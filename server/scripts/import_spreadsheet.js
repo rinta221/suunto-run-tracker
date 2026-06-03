@@ -120,12 +120,11 @@ if (!DRY_RUN) ensurePhasesExist();
 if (CLEAN) {
   if (!DRY_RUN) {
     const before = db.prepare('SELECT COUNT(*) as n FROM sessions').get().n;
-    db.prepare("DELETE FROM sessions WHERE suunto_workout_id LIKE 'SWO-%'").run();
-    const after = db.prepare('SELECT COUNT(*) as n FROM sessions').get().n;
-    console.log(`[clean] ダミーセッション削除: ${before - after} 件\n`);
+    db.prepare('DELETE FROM sessions').run();
+    console.log(`[clean] 全セッション削除: ${before} 件\n`);
   } else {
-    const dummyCount = db.prepare("SELECT COUNT(*) as n FROM sessions WHERE suunto_workout_id LIKE 'SWO-%'").get().n;
-    console.log(`[clean DRY] ダミーセッション削除予定: ${dummyCount} 件\n`);
+    const count = db.prepare('SELECT COUNT(*) as n FROM sessions').get().n;
+    console.log(`[clean DRY] 全セッション削除予定: ${count} 件\n`);
   }
 }
 
