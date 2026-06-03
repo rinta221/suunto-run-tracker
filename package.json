@@ -1,0 +1,21 @@
+{
+  "name": "suunto-run-tracker",
+  "version": "1.0.0",
+  "description": "Suunto連携ランニング練習記録アプリ（Node.js + SQLite + Claude/ChatGPT AI評価）",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "playwright": "^1.60.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

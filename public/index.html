@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suunto Run Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header id="app-header">
+    <div class="header-left">
+      <span class="app-logo">🏃</span>
+      <span class="app-title">Suunto Run Tracker</span>
+    </div>
+    <div class="header-center">
+      <span class="sync-info" id="sync-info">Phase 1 — モックアップ版</span>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-ghost" id="btn-add-session" title="セッション追加">＋ 追加</button>
+      <button class="btn btn-ghost" id="btn-settings" title="設定">⚙ 設定</button>
+    </div>
+  </header>
+
+  <!-- Month Navigation -->
+  <nav id="month-nav">
+    <button class="nav-btn" id="btn-prev-month">◀</button>
+    <button class="month-label" id="month-label">読み込み中...</button>
+    <button class="nav-btn" id="btn-next-month">▶</button>
+  </nav>
+
+  <!-- Filter Bar -->
+  <div id="filter-bar">
+    <div class="type-filters">
+      <label class="type-toggle running active" data-type="running">
+        <input type="checkbox" checked> 🏃 ランニング
+      </label>
+      <label class="type-toggle rest active" data-type="rest">
+        <input type="checkbox" checked> 💤 ランオフ
+      </label>
+      <label class="type-toggle manual active" data-type="manual">
+        <input type="checkbox" checked> 📝 手動記録
+      </label>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="search-input" placeholder="🔍 メニュー・メモ・感想・AI評価を検索" autocomplete="off">
+      <button class="btn btn-ghost btn-sm" id="btn-clear-search" title="検索クリア" style="display:none">✕</button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <label class="select-all-wrap">
+      <input type="checkbox" id="select-all"> 全選択
+    </label>
+    <span class="toolbar-sep">|</span>
+    <button class="btn btn-sm btn-ai claude" id="btn-bulk-claude" disabled>Claude 一括評価</button>
+    <button class="btn btn-sm btn-ai gpt" id="btn-bulk-gpt" disabled>GPT 一括評価</button>
+    <span class="toolbar-sep">|</span>
+    <div class="export-dropdown">
+      <button class="btn btn-sm" id="btn-export">エクスポート ▾</button>
+      <div class="dropdown-menu" id="export-menu" style="display:none">
+        <button data-action="tsv-month">TSV（今月）</button>
+        <button data-action="tsv-selected">TSV（選択行）</button>
+        <button data-action="tsv-all">TSV（全件）</button>
+        <hr>
+        <button data-action="md-selected">Markdown（選択行）</button>
+        <button data-action="md-all">Markdown（今月）</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div id="table-container">
+    <table id="session-table">
+      <thead id="session-thead"></thead>
+      <tbody id="session-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Status Bar -->
+  <div id="status-bar">
+    <span id="status-count"></span>
+    <span class="status-sep">|</span>
+    <span id="status-selected"></span>
+    <span class="status-sep">|</span>
+    <span id="status-distance"></span>
+    <span class="status-sep">|</span>
+    <span id="status-trimp"></span>
+  </div>
+
+  <!-- Detail Panel -->
+  <div id="detail-panel" class="panel-closed">
+    <div id="detail-panel-inner">
+      <button id="btn-close-panel">✕</button>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+  <div id="panel-overlay"></div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>設定</h2>
+        <button id="btn-close-settings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-tabs">
+          <button class="tab-btn active" data-tab="api">APIキー</button>
+          <button class="tab-btn" data-tab="shoes">シューズ</button>
+          <button class="tab-btn" data-tab="phases">フェーズ</button>
+          <button class="tab-btn" data-tab="columns">列設定</button>
+          <button class="tab-btn" data-tab="data">データ管理</button>
+        </div>
+        <div id="settings-tab-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Session Modal -->
+  <div id="add-session-modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2>セッション追加</h2>
+        <button id="btn-close-add">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>日付</label>
+          <input type="date" id="new-date" required>
+        </div>
+        <div class="form-group">
+          <label>種別</label>
+          <div class="type-radio-group">
+            <label><input type="radio" name="new-type" value="running" checked> 🏃 ランニング</label>
+            <label><input type="radio" name="new-type" value="rest"> 💤 ランオフ</label>
+            <label><input type="radio" name="new-type" value="manual"> 📝 手動記録</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btn-confirm-add">追加</button>
+          <button class="btn btn-ghost" id="btn-cancel-add">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Markdown Export Modal -->
+  <div id="md-modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Markdownエクスポート</h2>
+        <button id="btn-close-md">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>冒頭プロンプト</label>
+          <select id="md-prompt-select">
+            <option value="以下のランニングデータを分析して、トレーニングの傾向と改善点を教えてください。">傾向・改善点分析</option>
+            <option value="以下のデータをもとに、次週のトレーニングメニューを提案してください。">次週メニュー提案</option>
+            <option value="以下の練習データのパフォーマンストレンドを分析してください。">パフォーマンストレンド</option>
+            <option value="以下の練習記録に対して、コーチングコメントをお願いします。">コーチングコメント</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>プレビュー</label>
+          <textarea id="md-preview" rows="12" readonly></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btn-copy-md">📋 クリップボードにコピー</button>
+          <span id="md-copy-msg" style="display:none;color:var(--green)">✓ コピーしました</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Autocomplete dropdown -->
+  <div id="autocomplete-list" style="display:none"></div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
