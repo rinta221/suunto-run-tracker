@@ -1,5 +1,32 @@
 # 作業ログ
 
+## 2026-06-04 — session_type列追加・同日グルーピング表示（13章実装）
+
+### 変更内容
+
+#### DBスキーマ変更
+- `sessions.session_type TEXT` 列を追加（warmup / main / cooldown / NULL）
+- ALTER TABLE + 既存runningセッションをmenu欄キーワードでバックフィル
+  - warmup: 3件（WU/ウォームアップ/アップ走）
+  - cooldown: 2件（CL/CD/クールダウン/ダウン走）
+  - main: 152件（上記以外のrunning）
+
+#### インポートスクリプト（import_spreadsheet.js）
+- `inferSessionType(menu)` 関数を追加
+- インポート時に自動推測してsession_typeをセット
+
+#### UI（app.js / style.css）
+- 同日複数セッションをグルーピング表示
+  - 2行目以降の日付・曜日セルは空白（罫線で境界を示す）
+  - グループ先頭行に `border-top: 2px solid` を適用
+- session_typeバッジ（WU/M/CD）を同日複数セッション時のみ表示
+  - 色：WU=青、M=緑、CD=紫
+
+#### 未実装（Phase 2連携）
+- 「この日をまとめて評価」ボタンはPhase 2のAI評価API実装時に追加
+
+---
+
 ## 2026-06-04 — reportsテーブル追加（Phase 4 スキーマ先行定義）
 
 ### 変更内容

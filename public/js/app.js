@@ -253,21 +253,35 @@ function renderTbody() {
   const sessions = getFilteredSessions();
   const rows = buildDisplayRows(sessions);
 
+  const dateCounts = {};
+  for (const r of rows) {
+    if (r.kind === 'session') dateCounts[r.session.date] = (dateCounts[r.session.date] || 0) + 1;
+  }
+
   tbody.innerHTML = '';
+  let prevDate = null;
   for (const row of rows) {
     if (row.kind === 'phase-summary') {
       tbody.appendChild(buildPhaseSummaryRow(row));
+      prevDate = null;
     } else {
-      tbody.appendChild(buildSessionRow(row.session));
+      const s = row.session;
+      const isGroupStart = s.date !== prevDate;
+      tbody.appendChild(buildSessionRow(s, isGroupStart, dateCounts[s.date] > 1));
+      prevDate = s.date;
     }
   }
   renderStatusBar();
 }
 
-function buildSessionRow(s) {
+const SESSION_TYPE_LABEL = { warmup: 'WU', main: 'M', cooldown: 'CD' };
+const SESSION_TYPE_COLOR = { warmup: '#60a5fa', main: 'var(--green)', cooldown: '#a78bfa' };
+
+function buildSessionRow(s, isGroupStart = true, isMultiDay = false) {
   const tr = document.createElement('tr');
   tr.dataset.id = s.id;
   tr.className = 'row-' + s.activity_type;
+  if (isGroupStart) tr.classList.add('row-date-group-start');
   if (s.source === 'ai_generated') tr.classList.add('row-ai-generated');
   if (S.selectedIds.has(s.id)) tr.classList.add('row-selected');
 
@@ -285,15 +299,26 @@ function buildSessionRow(s) {
       td.appendChild(cb);
     } else if (col.id === 'type') {
       td.className += ' cell-type';
-      td.textContent = TYPE_ICON[s.activity_type] || '?';
       td.title = TYPE_LABEL[s.activity_type] || '';
+      const icon = document.createElement('div');
+      icon.textContent = TYPE_ICON[s.activity_type] || '?';
+      td.appendChild(icon);
+      if (s.session_type && isMultiDay) {
+        const badge = document.createElement('div');
+        badge.className = 'session-type-badge';
+        badge.textContent = SESSION_TYPE_LABEL[s.session_type] || '';
+        badge.style.background = SESSION_TYPE_COLOR[s.session_type] || 'var(--text-muted)';
+        td.appendChild(badge);
+      }
     } else if (col.id === 'date') {
-      td.textContent = s.date;
+      if (isGroupStart) td.textContent = s.date;
     } else if (col.id === 'dow') {
-      const d = dow(s.date);
-      td.textContent = d;
-      if (d === '土') td.style.color = '#3b82f6';
-      if (d === '日') td.style.color = '#ef4444';
+      if (isGroupStart) {
+        const d = dow(s.date);
+        td.textContent = d;
+        if (d === '土') td.style.color = '#3b82f6';
+        if (d === '日') td.style.color = '#ef4444';
+      }
     } else if (col.id === 'actions') {
       const cBtn = document.createElement('button');
       cBtn.className = 'btn btn-sm btn-ai claude';

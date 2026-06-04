@@ -624,6 +624,22 @@ td .delete-btn {
 tr:hover td .delete-btn { opacity: 1; }
 td .delete-btn:hover { color: var(--red); }
 
+/* ===== 日付グルーピング ===== */
+.row-date-group-start td { border-top: 2px solid var(--border); }
+
+/* session_typeバッジ（WU/M/CD） */
+.cell-type { text-align: center; }
+.session-type-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 3px;
+  padding: 0 3px;
+  line-height: 14px;
+  margin-top: 1px;
+}
+
 /* ===== AI生成行 ===== */
 .row-ai-generated { background: #fefce8; }
 .row-ai-generated:hover { background: #fef9c3; }

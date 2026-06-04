@@ -15,6 +15,7 @@ db.exec(`
     id                      TEXT PRIMARY KEY,
     activity_type           TEXT NOT NULL DEFAULT 'running',
     source                  TEXT NOT NULL DEFAULT 'manual',
+    session_type            TEXT,
     suunto_workout_id       TEXT,
     phase_id                TEXT,
     date                    TEXT NOT NULL,
