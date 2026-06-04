@@ -1,5 +1,23 @@
 # 作業ログ
 
+## 2026-06-04 — planned_menu列追加・AI生成行UI実装
+
+### 変更内容
+
+#### DBスキーマ変更
+- `sessions.planned_menu TEXT` 列を追加（AI提案メニュー、承認時にセット）
+- `database.js` のCREATE TABLE定義に追加（dateの直後）
+- ALTER TABLEマイグレーション実行済み
+- `import_spreadsheet.js` の DB_COLS にも追加
+
+#### UI変更（app.js / style.css）
+- `source='ai_generated'` かつ `planned_menu` ありの行のメニューセルを2段表示
+  - 1行目：`予定：{planned_menu}`（グレー、11px）
+  - 2行目：`実績：{menu}`（予定と異なる場合はオレンジ・太字）
+- AI生成行（`.row-ai-generated`）の行背景を薄黄色（`#fefce8`）でハイライト
+
+---
+
 ## 2026-06-04 — sessionsテーブルにsource列追加
 
 ### 変更内容

@@ -61,7 +61,7 @@ function isDuplicate(session) {
 }
 
 const DB_COLS = [
-  'id','activity_type','source','suunto_workout_id','phase_id','date','menu','memo','locate','shoes',
+  'id','activity_type','source','suunto_workout_id','phase_id','date','planned_menu','menu','memo','locate','shoes',
   'distance_km','duration_s','pace_per_km_s','avg_hr_pct','elevation_m','cadence_score','energy_kcal',
   'title','trimp','vo2max','ground_contact_ms','gcb_left_pct','vertical_oscillation_cm',
   'cadence_max_spm','cadence_avg_spm','stride_length_cm','gc_balance',

@@ -18,6 +18,7 @@ db.exec(`
     suunto_workout_id       TEXT,
     phase_id                TEXT,
     date                    TEXT NOT NULL,
+    planned_menu            TEXT,
     menu                    TEXT,
     memo                    TEXT,
     locate                  TEXT,

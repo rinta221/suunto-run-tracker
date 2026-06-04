@@ -623,3 +623,11 @@ td .delete-btn {
 }
 tr:hover td .delete-btn { opacity: 1; }
 td .delete-btn:hover { color: var(--red); }
+
+/* ===== AI生成行 ===== */
+.row-ai-generated { background: #fefce8; }
+.row-ai-generated:hover { background: #fef9c3; }
+.cell-menu-ai { line-height: 1.4; padding-top: 4px; padding-bottom: 4px; }
+.menu-planned { font-size: 11px; color: var(--text-muted); }
+.menu-actual  { font-size: 12px; color: var(--text); }
+.menu-actual-diff { color: #f97316; font-weight: 600; }

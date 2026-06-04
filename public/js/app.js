@@ -16,17 +16,17 @@ const COLUMNS = [
   { id: 'duration_s',              label: 'タイム',    width: 72,  num: true, fmt: 'duration' },
   { id: 'pace_per_km_s',           label: 'ペース',    width: 62,  num: true, fmt: 'pace' },
   { id: 'avg_hr_pct',              label: 'HR%',       width: 55,  num: true },
-  { id: 'elevation_m',             label: '標高m',     width: 60,  num: true },
+  { id: 'elevation_m',             label: '標高',      width: 60,  num: true },
   // CS列（cadence_score）はメインテーブルに表示しない（設計書 3.2節 L列）
   { id: 'energy_kcal',             label: 'kcal',      width: 58,  num: true },
   { id: 'title',                   label: 'タイトル',  width: 120 },
   { id: 'trimp',                   label: 'TRIMP',     width: 55,  num: true },
   { id: 'vo2max',                  label: 'VO2max',    width: 62,  num: true },
   // バイオメカニクス（常時表示・非表示不可）設計書 7.1節
-  { id: 'ground_contact_ms',       label: 'GC(ms)',    width: 62,  num: true },
-  { id: 'vertical_oscillation_cm', label: 'VO(cm)',    width: 58,  num: true },
-  { id: 'stride_length_cm',        label: 'Stride',    width: 58,  num: true },
-  { id: 'gcb_left_pct',            label: 'GCB(%)',    width: 58,  num: true },
+  { id: 'ground_contact_ms',       label: 'GC',        width: 62,  num: true },
+  { id: 'vertical_oscillation_cm', label: 'VO',        width: 58,  num: true },
+  { id: 'stride_length_cm',        label: 'Stride',    width: 64,  num: true },
+  { id: 'gcb_left_pct',            label: 'GCB',       width: 110, num: true },
   // 以下は非表示（bio: true）
   { id: 'cadence_max_spm',         label: 'Cad最大',   width: 66,  num: true, bio: true },
   { id: 'cadence_avg_spm',         label: 'Cad平均',   width: 66,  num: true, bio: true },
@@ -80,13 +80,16 @@ function formatCell(col, session) {
   if (col.fmt === 'duration') return fmtDuration(v);
   if (col.fmt === 'pace') return v ? fmtPace(v) + '/km' : '';
   if (col.num && v != null) {
-    if (col.id === 'distance_km') return fmtNum(v);
+    if (col.id === 'distance_km') return fmtNum(v) + 'km';
     if (col.id === 'avg_hr_pct') return typeof v === 'number' ? Math.round(v) + '%' : v;
+    if (col.id === 'elevation_m') return typeof v === 'number' ? Math.round(v) + 'm' : v;
+    if (col.id === 'energy_kcal') return typeof v === 'number' ? Math.round(v) + 'kcal' : v;
+    if (col.id === 'trimp') return typeof v === 'number' ? Math.round(v) : v;
     if (col.id === 'vo2max') return fmtNum(v);
-    if (col.id === 'vertical_oscillation_cm') return fmtNum(v);
-    if (col.id === 'stride_length_cm') return fmtNum(v);
-    if (col.id === 'gcb_left_pct') return fmtNum(v);
-    if (col.id === 'ground_contact_ms') return typeof v === 'number' ? Math.round(v) : v;
+    if (col.id === 'ground_contact_ms') return typeof v === 'number' ? Math.round(v) + 'ms' : v;
+    if (col.id === 'vertical_oscillation_cm') return fmtNum(v) + 'cm';
+    if (col.id === 'stride_length_cm') return fmtNum(v) + 'cm';
+    if (col.id === 'gcb_left_pct') return v.toFixed(1) + '% - ' + (100 - v).toFixed(1) + '%';
     return typeof v === 'number' ? (Number.isInteger(v) ? v : fmtNum(v)) : v;
   }
   return v != null ? String(v) : '';
@@ -265,6 +268,7 @@ function buildSessionRow(s) {
   const tr = document.createElement('tr');
   tr.dataset.id = s.id;
   tr.className = 'row-' + s.activity_type;
+  if (s.source === 'ai_generated') tr.classList.add('row-ai-generated');
   if (S.selectedIds.has(s.id)) tr.classList.add('row-selected');
 
   const visibleCols = COLUMNS.filter(c => !c.bio);
@@ -323,6 +327,14 @@ function buildSessionRow(s) {
         td.className += ' cell-ai-empty';
         td.textContent = '—';
       }
+    } else if (col.id === 'menu' && s.source === 'ai_generated' && s.planned_menu) {
+      td.className += ' cell-wrap cell-menu-ai';
+      const isDiff = s.menu && s.menu !== s.planned_menu;
+      td.innerHTML =
+        `<div class="menu-planned">予定：${escHtml(s.planned_menu)}</div>` +
+        `<div class="menu-actual${isDiff ? ' menu-actual-diff' : ''}">実績：${escHtml(s.menu || '—')}</div>`;
+      td.dataset.field = col.id;
+      td.dataset.id = s.id;
     } else if (col.editable) {
       const v = formatCell(col, s);
       td.className += ' cell-wrap';
@@ -738,7 +750,7 @@ function buildBioStatsHtml(s) {
         ${s.vertical_oscillation_cm ? `<div class="stat-card"><div class="stat-value">${fmtNum(s.vertical_oscillation_cm)}<small style="font-size:11px">cm</small></div><div class="stat-label">上下動</div></div>` : ''}
         ${s.cadence_avg_spm ? `<div class="stat-card"><div class="stat-value">${s.cadence_avg_spm}<small style="font-size:11px">spm</small></div><div class="stat-label">平均Cad</div></div>` : ''}
         ${s.stride_length_cm ? `<div class="stat-card"><div class="stat-value">${s.stride_length_cm}<small style="font-size:11px">cm</small></div><div class="stat-label">歩幅</div></div>` : ''}
-        ${s.gcb_left_pct ? `<div class="stat-card"><div class="stat-value">${fmtNum(s.gcb_left_pct)}<small style="font-size:11px">%</small></div><div class="stat-label">GCB左</div></div>` : ''}
+        ${s.gcb_left_pct ? `<div class="stat-card"><div class="stat-value" style="font-size:14px">${s.gcb_left_pct.toFixed(1)}% - ${(100 - s.gcb_left_pct).toFixed(1)}%</div><div class="stat-label">GCB（左-右）</div></div>` : ''}
         ${s.elevation_m ? `<div class="stat-card"><div class="stat-value">${s.elevation_m}<small style="font-size:11px">m</small></div><div class="stat-label">累積標高</div></div>` : ''}
       </div>
     </div>
@@ -765,7 +777,7 @@ function buildLapTableHtml(laps, s) {
       <td class="cell-num">${l.ground_contact_ms != null ? l.ground_contact_ms + 'ms' : '—'}</td>
       <td class="cell-num">${l.vertical_oscillation_cm != null ? l.vertical_oscillation_cm.toFixed(1) + 'cm' : '—'}</td>
       <td class="cell-num">${l.stride_length_m != null ? l.stride_length_m.toFixed(3) + 'm' : '—'}</td>
-      <td class="cell-num">${l.gcb_left_pct != null ? l.gcb_left_pct.toFixed(1) + '%' : '—'}</td>
+      <td class="cell-num">${l.gcb_left_pct != null ? l.gcb_left_pct.toFixed(1) + '% - ' + (100 - l.gcb_left_pct).toFixed(1) + '%' : '—'}</td>
     ` : '';
     rows += `<tr>
       <td>${l.lap_number}</td>
