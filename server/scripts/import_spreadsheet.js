@@ -61,7 +61,7 @@ function isDuplicate(session) {
 }
 
 const DB_COLS = [
-  'id','activity_type','suunto_workout_id','phase_id','date','menu','memo','locate','shoes',
+  'id','activity_type','source','suunto_workout_id','phase_id','date','menu','memo','locate','shoes',
   'distance_km','duration_s','pace_per_km_s','avg_hr_pct','elevation_m','cadence_score','energy_kcal',
   'title','trimp','vo2max','ground_contact_ms','gcb_left_pct','vertical_oscillation_cm',
   'cadence_max_spm','cadence_avg_spm','stride_length_cm','gc_balance',
@@ -92,6 +92,7 @@ function importSessions(sessions, source) {
     }
 
     s.phase_id = getPhaseId(s.date);
+    if (!s.source) s.source = s.suunto_workout_id ? 'suunto' : 'manual';
     if (!s.created_at) s.created_at = now;
     if (!s.updated_at) s.updated_at = now;
 

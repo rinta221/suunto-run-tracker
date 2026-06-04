@@ -1,5 +1,26 @@
 # 作業ログ
 
+## 2026-06-04 — sessionsテーブルにsource列追加
+
+### 変更内容
+
+#### DBスキーマ変更
+- `sessions` テーブルに `source TEXT NOT NULL DEFAULT 'manual'` 列を追加
+- 値: `'manual'`（スプレッドシート/手動）/ `'suunto'`（Suunto連携）/ `'ai_generated'`（Phase 2.5 AI生成）
+- `database.js` のCREATE TABLE定義に追加
+- ALTER TABLE マイグレーション実行済み（既存280件→`'manual'`、Suunto 1件→`'suunto'`）
+
+#### インポートスクリプト更新（import_spreadsheet.js）
+- `DB_COLS` に `source` を追加
+- `suunto_workout_id` の有無で自動判定（`suunto_workout_id`あり→`'suunto'`、なし→`'manual'`）
+- JSONデータに `source` フィールドがある場合はそのまま使用
+
+#### 設計書更新
+- `docs/design_v4.md` に11章「AI練習メニュー生成機能（Phase 2.5）」追加
+- Phase 2（AI評価API連携）完了後に実装予定
+
+---
+
 ## 2026-06-03 — データ修正・列仕様変更
 
 ### 修正内容

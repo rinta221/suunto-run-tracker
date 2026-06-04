@@ -14,6 +14,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS sessions (
     id                      TEXT PRIMARY KEY,
     activity_type           TEXT NOT NULL DEFAULT 'running',
+    source                  TEXT NOT NULL DEFAULT 'manual',
     suunto_workout_id       TEXT,
     phase_id                TEXT,
     date                    TEXT NOT NULL,
