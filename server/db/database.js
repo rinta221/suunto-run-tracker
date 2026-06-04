@@ -68,6 +68,19 @@ db.exec(`
     notes         TEXT
   );
 
+  CREATE TABLE IF NOT EXISTS reports (
+    id          TEXT PRIMARY KEY,
+    title       TEXT NOT NULL,
+    content_md  TEXT NOT NULL,
+    report_type TEXT,
+    start_date  TEXT,
+    end_date    TEXT,
+    is_active   INTEGER DEFAULT 1,
+    priority    INTEGER DEFAULT 0,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT

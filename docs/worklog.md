@@ -1,5 +1,27 @@
 # 作業ログ
 
+## 2026-06-04 — reportsテーブル追加（Phase 4 スキーマ先行定義）
+
+### 変更内容
+
+#### DBスキーマ変更
+- `reports` テーブルを新設（CREATE TABLE IF NOT EXISTS で追加）
+- 設計書12章「フェーズレポート（常駐プロンプト）機能」に対応するスキーマ
+- 実装は Phase 2（AI評価API連携）完了後に着手予定（Phase 4）
+
+| 列 | 型 | 備考 |
+|---|---|---|
+| id | TEXT PK | UUID |
+| title | TEXT | レポート名 |
+| content_md | TEXT | Markdown本文 |
+| report_type | TEXT | roadmap / phase_review / theme / form |
+| start_date | TEXT | 有効期間開始 |
+| end_date | TEXT | 有効期間終了（NULL=無期限） |
+| is_active | INTEGER | 常駐フラグ（AI評価時に送信） |
+| priority | INTEGER | 複数レポート時の優先順位 |
+
+---
+
 ## 2026-06-04 — planned_menu列追加・AI生成行UI実装
 
 ### 変更内容
