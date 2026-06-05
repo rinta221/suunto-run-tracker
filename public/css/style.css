@@ -72,9 +72,10 @@ body {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
   flex-shrink: 0;
+  padding-left: 12px;
 }
 .nav-btn {
   background: none;
@@ -362,7 +363,7 @@ tr.row-phase-summary td {
   right: 0;
   top: 0;
   height: 100%;
-  width: 400px;
+  width: 60vw;
   background: var(--surface);
   box-shadow: -4px 0 20px rgba(0,0,0,.12);
   z-index: 200;
@@ -370,6 +371,7 @@ tr.row-phase-summary td {
   transition: transform .25s ease;
   display: flex;
   flex-direction: column;
+  pointer-events: auto;
 }
 #detail-panel.panel-open { transform: translateX(0); }
 #panel-overlay {
@@ -378,6 +380,7 @@ tr.row-phase-summary td {
   inset: 0;
   background: rgba(0,0,0,.15);
   z-index: 199;
+  pointer-events: none;
 }
 #detail-panel-inner {
   display: flex;

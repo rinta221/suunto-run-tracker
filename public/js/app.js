@@ -1335,7 +1335,6 @@ function initEvents() {
 
   // Detail panel
   document.getElementById('btn-close-panel').addEventListener('click', closeDetailPanel);
-  document.getElementById('panel-overlay').addEventListener('click', closeDetailPanel);
 
   // Settings
   document.getElementById('btn-settings').addEventListener('click', () => openSettings('api'));
