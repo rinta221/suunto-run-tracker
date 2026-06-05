@@ -88,7 +88,7 @@ function formatCell(col, session) {
     if (col.id === 'vo2max') return fmtNum(v);
     if (col.id === 'ground_contact_ms') return typeof v === 'number' ? Math.round(v) + 'ms' : v;
     if (col.id === 'vertical_oscillation_cm') return fmtNum(v) + 'cm';
-    if (col.id === 'stride_length_cm') return fmtNum(v) + 'cm';
+    if (col.id === 'stride_length_cm') return (v / 100).toFixed(2) + ' m';
     if (col.id === 'gcb_left_pct') return v.toFixed(1) + '% - ' + (100 - v).toFixed(1) + '%';
     return typeof v === 'number' ? (Number.isInteger(v) ? v : fmtNum(v)) : v;
   }
@@ -774,7 +774,7 @@ function buildBioStatsHtml(s) {
         ${s.ground_contact_ms ? `<div class="stat-card"><div class="stat-value">${s.ground_contact_ms}<small style="font-size:11px">ms</small></div><div class="stat-label">接地時間</div></div>` : ''}
         ${s.vertical_oscillation_cm ? `<div class="stat-card"><div class="stat-value">${fmtNum(s.vertical_oscillation_cm)}<small style="font-size:11px">cm</small></div><div class="stat-label">上下動</div></div>` : ''}
         ${s.cadence_avg_spm ? `<div class="stat-card"><div class="stat-value">${s.cadence_avg_spm}<small style="font-size:11px">spm</small></div><div class="stat-label">平均Cad</div></div>` : ''}
-        ${s.stride_length_cm ? `<div class="stat-card"><div class="stat-value">${s.stride_length_cm}<small style="font-size:11px">cm</small></div><div class="stat-label">歩幅</div></div>` : ''}
+        ${s.stride_length_cm ? `<div class="stat-card"><div class="stat-value">${(s.stride_length_cm / 100).toFixed(2)}<small style="font-size:11px">m</small></div><div class="stat-label">歩幅</div></div>` : ''}
         ${s.gcb_left_pct ? `<div class="stat-card"><div class="stat-value" style="font-size:14px">${s.gcb_left_pct.toFixed(1)}% - ${(100 - s.gcb_left_pct).toFixed(1)}%</div><div class="stat-label">GCB（左-右）</div></div>` : ''}
         ${s.elevation_m ? `<div class="stat-card"><div class="stat-value">${s.elevation_m}<small style="font-size:11px">m</small></div><div class="stat-label">累積標高</div></div>` : ''}
       </div>
@@ -789,26 +789,19 @@ function buildLapTableHtml(laps, s) {
   // Detect if bio columns are available (from Suunto JSON source)
   const hasBio = laps.some(l => l.ground_contact_ms != null || l.vertical_oscillation_cm != null);
 
-  // Paginate for very long races (e.g. 102 laps)
-  const maxRows = 30;
-  const shown = laps.length > maxRows ? laps.filter((_, i) => i % Math.ceil(laps.length / maxRows) === 0) : laps;
-  const note = laps.length > maxRows
-    ? `<p style="font-size:11px;color:var(--text-muted);margin-bottom:4px">全${laps.length}ラップ（${shown.length}件表示）</p>`
-    : '';
-
   let rows = '';
-  for (const l of shown) {
+  for (const l of laps) {
     const bioHtml = hasBio ? `
       <td class="cell-num">${l.ground_contact_ms != null ? l.ground_contact_ms + 'ms' : '—'}</td>
       <td class="cell-num">${l.vertical_oscillation_cm != null ? l.vertical_oscillation_cm.toFixed(1) + 'cm' : '—'}</td>
-      <td class="cell-num">${l.stride_length_m != null ? l.stride_length_m.toFixed(3) + 'm' : '—'}</td>
-      <td class="cell-num">${l.gcb_left_pct != null ? l.gcb_left_pct.toFixed(1) + '% - ' + (100 - l.gcb_left_pct).toFixed(1) + '%' : '—'}</td>
+      <td class="cell-num">${l.stride_length_m != null ? l.stride_length_m.toFixed(2) + ' m' : '—'}</td>
+      <td class="cell-num">${l.gcb_left_pct != null ? l.gcb_left_pct.toFixed(1) + '%' : '—'}</td>
     ` : '';
     rows += `<tr>
       <td>${l.lap_number}</td>
       <td class="cell-num">${fmtNum(l.distance_km)}</td>
       <td class="cell-num">${l.pace_s ? fmtPace(l.pace_s) : '—'}</td>
-      <td class="cell-num">${l.avg_hr_pct != null ? l.avg_hr_pct : '—'}</td>
+      <td class="cell-num">${l.avg_hr_bpm != null ? l.avg_hr_bpm + 'bpm' : '—'}</td>
       <td class="cell-num">${l.power_w != null ? l.power_w : '—'}</td>
       <td class="cell-num">${l.cadence_spm != null ? l.cadence_spm : '—'}</td>
       <td class="cell-num">${l.elevation_gain_m != null ? l.elevation_gain_m : '—'}</td>
@@ -822,10 +815,9 @@ function buildLapTableHtml(laps, s) {
 
   return `
     <h3>ラップデータ（${laps.length}ラップ）${hasBio ? ' <span style="font-size:10px;font-weight:normal;color:var(--green)">✓ バイオメカニクスあり</span>' : ''}</h3>
-    ${note}
-    <div style="overflow-x:auto">
-    <table class="lap-table">
-      <thead><tr><th>Lap</th><th>km</th><th>Pace</th><th>HR</th><th>W</th><th>Cad</th><th>↑m</th>${bioHeaders}</tr></thead>
+    <div style="overflow-x:auto;max-height:480px;overflow-y:auto">
+    <table class="lap-table" style="position:relative">
+      <thead style="position:sticky;top:0;z-index:1"><tr><th>Lap</th><th>km</th><th>Pace</th><th>HR</th><th>W</th><th>Cad</th><th>↑m</th>${bioHeaders}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
     </div>
@@ -862,14 +854,43 @@ function initDetailCharts(laps) {
     type: 'line',
     data: {
       labels,
-      datasets: [{ label: 'HR', data: chartLaps.map(l => l.avg_hr_pct), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.08)', tension: 0.3, fill: true, pointRadius: ptRadius }]
+      datasets: [{ label: 'HR (bpm)', data: chartLaps.map(l => l.avg_hr_bpm), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.08)', tension: 0.3, fill: true, pointRadius: ptRadius }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } }
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + 'bpm' } } },
+      scales: { y: { ticks: { callback: v => v + 'bpm', font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } }
     }
   });
+
+  const hasGcb = laps.some(l => l.gcb_left_pct != null);
+  if (hasGcb) {
+    const chartSection = document.getElementById('chart-section');
+    if (!chartSection) return;
+    if (!document.getElementById('lap-chart-gcb')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'chart-wrap';
+      const canvas = document.createElement('canvas');
+      canvas.id = 'lap-chart-gcb';
+      wrap.appendChild(canvas);
+      chartSection.appendChild(wrap);
+    }
+    new Chart(document.getElementById('lap-chart-gcb'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: '左GCB%', data: chartLaps.map(l => l.gcb_left_pct), borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.08)', tension: 0.3, fill: false, pointRadius: ptRadius },
+          { label: '50%基準', data: chartLaps.map(() => 50), borderColor: '#94a3b8', borderDash: [5, 5], pointRadius: 0, fill: false }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { font: { size: 10 } } }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.raw + '%' } } },
+        scales: { y: { min: 48, max: 52, ticks: { callback: v => v + '%', font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } }
+      }
+    });
+  }
 
   if (hasBio) {
     // Add bio charts (GCT and VO)

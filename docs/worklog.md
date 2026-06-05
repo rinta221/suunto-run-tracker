@@ -1,5 +1,28 @@
 # 作業ログ
 
+## 2026-06-05 — ラップ表示改善：HR bpm化・GCBグラフ・Stride m統一・全ラップ表示
+
+### 変更内容
+
+#### data/sample_sessions.json（ユーザー更新）
+- ラップHRフィールドを `avg_hr_pct`（異常値）→ `avg_hr_bpm`（正常bpm値）に変更
+- 全102ラップに `gcb_left_pct`（左右接地バランス）を追加
+
+#### server/routes/sessions.js
+- ラップAPI（`/api/sessions/:id/laps`）で `avg_hr_bpm`/`max_hr_bpm` を返すよう変更
+
+#### public/js/app.js
+- ラップテーブルのHR列：`avg_hr_pct` → `avg_hr_bpm`（整数bpm表示）
+- ラップテーブルのGCB列：`50.7% - 49.3%` → `50.7%`（左%のみ）
+- ラップテーブルのStride列：`.toFixed(3)+'m'` → `.toFixed(2)+' m'`（小数2桁）
+- ラップテーブル：間引き表示（最大30件）を廃止→全件表示（スクロール可・max-height:480px・sticky thead）
+- セッション平均の歩幅：`stride_length_cm` → m変換・小数2桁表示
+- メインテーブルのStride列：cm → m変換・小数2桁表示
+- HRグラフ：`avg_hr_pct` → `avg_hr_bpm`、軸・ツールチップにbpm単位を追加
+- GCBグラフ追加：50%基準線（破線）付き折れ線グラフ、Y軸48〜52%にズーム
+
+---
+
 ## 2026-06-05 — README.mdに起動・停止コマンド追加
 
 ### 変更内容
