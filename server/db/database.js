@@ -91,5 +91,7 @@ db.exec(`
 // Migration: add lock columns (idempotent)
 try { db.exec('ALTER TABLE sessions ADD COLUMN claude_eval_locked INTEGER DEFAULT 0'); } catch(e) {}
 try { db.exec('ALTER TABLE sessions ADD COLUMN gpt_eval_locked INTEGER DEFAULT 0'); } catch(e) {}
+// Backfill: existing rows with gpt_eval should be locked (initial protection)
+db.exec("UPDATE sessions SET gpt_eval_locked=1 WHERE gpt_eval IS NOT NULL AND gpt_eval != '' AND gpt_eval_locked=0");
 
 module.exports = db;
