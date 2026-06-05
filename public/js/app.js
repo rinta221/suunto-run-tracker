@@ -804,7 +804,7 @@ function buildLapTableHtml(laps, s) {
       <td class="cell-num">${l.avg_hr_bpm != null ? l.avg_hr_bpm + 'bpm' : '—'}</td>
       <td class="cell-num">${l.power_w != null ? l.power_w : '—'}</td>
       <td class="cell-num">${l.cadence_spm != null ? l.cadence_spm : '—'}</td>
-      <td class="cell-num">${l.elevation_gain_m != null ? l.elevation_gain_m : '—'}</td>
+      <td class="cell-num" style="white-space:nowrap">${(l.ascent_m != null || l.descent_m != null) ? `+${l.ascent_m ?? 0}/-${l.descent_m ?? 0}m` : '—'}</td>
       ${bioHtml}
     </tr>`;
   }
@@ -817,7 +817,7 @@ function buildLapTableHtml(laps, s) {
     <h3>ラップデータ（${laps.length}ラップ）${hasBio ? ' <span style="font-size:10px;font-weight:normal;color:var(--green)">✓ バイオメカニクスあり</span>' : ''}</h3>
     <div style="overflow-x:auto;max-height:480px;overflow-y:auto">
     <table class="lap-table" style="position:relative">
-      <thead style="position:sticky;top:0;z-index:1"><tr><th>Lap</th><th>km</th><th>Pace</th><th>HR</th><th>W</th><th>Cad</th><th>↑m</th>${bioHeaders}</tr></thead>
+      <thead style="position:sticky;top:0;z-index:1"><tr><th>Lap</th><th>km</th><th>Pace</th><th>HR</th><th>W</th><th>Cad</th><th>↑/↓</th>${bioHeaders}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
     </div>

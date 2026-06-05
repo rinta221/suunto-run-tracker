@@ -139,7 +139,8 @@ router.get('/:id/laps', (req, res) => {
     pace_s: l.pace_s,
     avg_hr_bpm: l.avg_hr_bpm != null ? Math.round(l.avg_hr_bpm) : null,
     max_hr_bpm: l.max_hr_bpm != null ? Math.round(l.max_hr_bpm) : null,
-    elevation_gain_m: l.elevation_gain_m,
+    ascent_m: l.ascent_m != null ? Math.round(l.ascent_m) : (l.elevation_gain_m != null ? Math.round(l.elevation_gain_m) : null),
+    descent_m: l.descent_m != null ? Math.round(l.descent_m) : null,
     power_w: l.power_w != null ? Math.round(l.power_w * 10) / 10 : null,
     cadence_spm: l.cadence_spm,
     // Biomechanics — available from Suunto JSON export (not from FIT)

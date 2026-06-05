@@ -1,5 +1,16 @@
 # 作業ログ
 
+## 2026-06-05 — ラップ標高を ascent_m/descent_m に分離・歩幅算出方法変更
+
+### 変更内容
+- `stride_length_m`: JSONの不正確なStrideフィールドを廃止 → `Speed ÷ (Cadence_rps × 2)` で再計算（Runalyze一致）
+- `elevation_gain_m` を `ascent_m` + `descent_m` の2フィールドに分離
+- ラップテーブルの `↑m` 列を `↑/↓` 列に変更（例：`+0/-58m`、`+93/-0m`）
+- ラップAPI（sessions.js）: `elevation_gain_m` → `ascent_m`/`descent_m` に変更（旧フィールドへのフォールバック付き）
+- DB `--clean` 再インポート済み
+
+---
+
 ## 2026-06-05 — sample_sessions.jsonバグ修正・DB再インポート
 
 ### 変更内容
