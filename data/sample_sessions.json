@@ -26,16 +26,16 @@
     "gcb_left_pct": 50.1,
     "vertical_oscillation_cm": 8.3,
     "cadence_max_spm": null,
-    "cadence_avg_spm": null,
-    "stride_length_cm": 204.9,
+    "cadence_avg_spm": 166,
+    "stride_length_cm": 94.0,
     "gc_balance": "50.1% - 49.9%",
     "impression": "",
     "claude_eval": null,
     "claude_eval_at": null,
     "gpt_eval": null,
     "gpt_eval_at": null,
-    "created_at": "2026-06-05T06:12:57.062200",
-    "updated_at": "2026-06-05T06:12:57.062340",
+    "created_at": "2026-06-05T06:51:41.988626",
+    "updated_at": "2026-06-05T06:51:41.988798",
     "laps": [
       {
         "lap_number": 1,
@@ -46,10 +46,10 @@
         "max_hr_bpm": 150,
         "elevation_gain_m": 2,
         "power_w": 159.3,
-        "cadence_spm": 3,
+        "cadence_spm": 160,
         "ground_contact_ms": 256.0,
         "vertical_oscillation_cm": 9.0,
-        "stride_length_m": 0.939,
+        "stride_length_m": 0.94,
         "gcb_left_pct": 50.7
       },
       {
@@ -61,10 +61,10 @@
         "max_hr_bpm": 150,
         "elevation_gain_m": 3,
         "power_w": 164.2,
-        "cadence_spm": 3,
+        "cadence_spm": 170,
         "ground_contact_ms": 249.0,
         "vertical_oscillation_cm": 8.6,
-        "stride_length_m": 0.925,
+        "stride_length_m": 0.93,
         "gcb_left_pct": 50.8
       },
       {
@@ -76,10 +76,10 @@
         "max_hr_bpm": 156,
         "elevation_gain_m": 11,
         "power_w": 175.1,
-        "cadence_spm": 3,
+        "cadence_spm": 170,
         "ground_contact_ms": 247.0,
         "vertical_oscillation_cm": 8.5,
-        "stride_length_m": 0.958,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 51.2
       },
       {
@@ -91,10 +91,10 @@
         "max_hr_bpm": 158,
         "elevation_gain_m": 16,
         "power_w": 175.6,
-        "cadence_spm": 3,
+        "cadence_spm": 167,
         "ground_contact_ms": 252.0,
         "vertical_oscillation_cm": 8.7,
-        "stride_length_m": 0.955,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 50.7
       },
       {
@@ -106,10 +106,10 @@
         "max_hr_bpm": 159,
         "elevation_gain_m": 5,
         "power_w": 162.4,
-        "cadence_spm": 3,
+        "cadence_spm": 167,
         "ground_contact_ms": 241.0,
         "vertical_oscillation_cm": 8.3,
-        "stride_length_m": 0.943,
+        "stride_length_m": 0.94,
         "gcb_left_pct": 50.4
       },
       {
@@ -121,10 +121,10 @@
         "max_hr_bpm": 156,
         "elevation_gain_m": 10,
         "power_w": 173.6,
-        "cadence_spm": 3,
+        "cadence_spm": 175,
         "ground_contact_ms": 239.0,
         "vertical_oscillation_cm": 8.2,
-        "stride_length_m": 0.957,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 50.9
       },
       {
@@ -136,10 +136,10 @@
         "max_hr_bpm": 162,
         "elevation_gain_m": 25,
         "power_w": 174.7,
-        "cadence_spm": 3,
+        "cadence_spm": 173,
         "ground_contact_ms": 227.0,
         "vertical_oscillation_cm": 7.8,
-        "stride_length_m": 0.911,
+        "stride_length_m": 0.91,
         "gcb_left_pct": 51.3
       },
       {
@@ -151,10 +151,10 @@
         "max_hr_bpm": 164,
         "elevation_gain_m": 28,
         "power_w": 185.3,
-        "cadence_spm": 3,
+        "cadence_spm": 181,
         "ground_contact_ms": 222.0,
         "vertical_oscillation_cm": 7.6,
-        "stride_length_m": 0.911,
+        "stride_length_m": 0.91,
         "gcb_left_pct": 51.6
       },
       {
@@ -166,10 +166,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 19,
         "power_w": 169.9,
-        "cadence_spm": 3,
+        "cadence_spm": 172,
         "ground_contact_ms": 225.0,
         "vertical_oscillation_cm": 7.7,
-        "stride_length_m": 0.902,
+        "stride_length_m": 0.9,
         "gcb_left_pct": 51.0
       },
       {
@@ -181,10 +181,10 @@
         "max_hr_bpm": 162,
         "elevation_gain_m": 33,
         "power_w": 181.2,
-        "cadence_spm": 3,
+        "cadence_spm": 181,
         "ground_contact_ms": 225.0,
         "vertical_oscillation_cm": 7.6,
-        "stride_length_m": 0.885,
+        "stride_length_m": 0.88,
         "gcb_left_pct": 51.3
       },
       {
@@ -196,10 +196,10 @@
         "max_hr_bpm": 163,
         "elevation_gain_m": 25,
         "power_w": 179.9,
-        "cadence_spm": 3,
+        "cadence_spm": 181,
         "ground_contact_ms": 221.0,
         "vertical_oscillation_cm": 7.6,
-        "stride_length_m": 0.891,
+        "stride_length_m": 0.89,
         "gcb_left_pct": 50.8
       },
       {
@@ -211,10 +211,10 @@
         "max_hr_bpm": 165,
         "elevation_gain_m": 64,
         "power_w": 181.2,
-        "cadence_spm": 3,
+        "cadence_spm": 180,
         "ground_contact_ms": 219.0,
         "vertical_oscillation_cm": 7.7,
-        "stride_length_m": 0.774,
+        "stride_length_m": 0.77,
         "gcb_left_pct": 51.8
       },
       {
@@ -226,10 +226,10 @@
         "max_hr_bpm": 167,
         "elevation_gain_m": 76,
         "power_w": 163.4,
-        "cadence_spm": 3,
+        "cadence_spm": 153,
         "ground_contact_ms": 241.0,
         "vertical_oscillation_cm": 8.5,
-        "stride_length_m": 0.772,
+        "stride_length_m": 0.77,
         "gcb_left_pct": 50.1
       },
       {
@@ -241,10 +241,10 @@
         "max_hr_bpm": 162,
         "elevation_gain_m": 48,
         "power_w": 167.4,
-        "cadence_spm": 3,
+        "cadence_spm": 175,
         "ground_contact_ms": 224.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 0.889,
+        "stride_length_m": 0.89,
         "gcb_left_pct": 50.9
       },
       {
@@ -256,10 +256,10 @@
         "max_hr_bpm": 145,
         "elevation_gain_m": 0,
         "power_w": 150.6,
-        "cadence_spm": 3,
+        "cadence_spm": 187,
         "ground_contact_ms": 210.0,
         "vertical_oscillation_cm": 7.2,
-        "stride_length_m": 0.931,
+        "stride_length_m": 0.93,
         "gcb_left_pct": 50.4
       },
       {
@@ -271,10 +271,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 17,
         "power_w": 171.5,
-        "cadence_spm": 3,
+        "cadence_spm": 187,
         "ground_contact_ms": 206.0,
         "vertical_oscillation_cm": 7.1,
-        "stride_length_m": 1.015,
+        "stride_length_m": 1.02,
         "gcb_left_pct": 50.9
       },
       {
@@ -286,10 +286,10 @@
         "max_hr_bpm": 151,
         "elevation_gain_m": 3,
         "power_w": 161.8,
-        "cadence_spm": 3,
+        "cadence_spm": 180,
         "ground_contact_ms": 219.0,
         "vertical_oscillation_cm": 7.5,
-        "stride_length_m": 0.967,
+        "stride_length_m": 0.97,
         "gcb_left_pct": 50.7
       },
       {
@@ -301,10 +301,10 @@
         "max_hr_bpm": 150,
         "elevation_gain_m": 0,
         "power_w": 156.0,
-        "cadence_spm": 3,
+        "cadence_spm": 157,
         "ground_contact_ms": 244.0,
         "vertical_oscillation_cm": 8.3,
-        "stride_length_m": 0.905,
+        "stride_length_m": 0.9,
         "gcb_left_pct": 49.9
       },
       {
@@ -316,10 +316,10 @@
         "max_hr_bpm": 157,
         "elevation_gain_m": 2,
         "power_w": 175.9,
-        "cadence_spm": 3,
+        "cadence_spm": 170,
         "ground_contact_ms": 249.0,
         "vertical_oscillation_cm": 8.6,
-        "stride_length_m": 1.029,
+        "stride_length_m": 1.03,
         "gcb_left_pct": 50.8
       },
       {
@@ -331,10 +331,10 @@
         "max_hr_bpm": 157,
         "elevation_gain_m": 2,
         "power_w": 185.2,
-        "cadence_spm": 3,
+        "cadence_spm": 176,
         "ground_contact_ms": 239.0,
         "vertical_oscillation_cm": 8.1,
-        "stride_length_m": 1.029,
+        "stride_length_m": 1.03,
         "gcb_left_pct": 50.4
       },
       {
@@ -346,10 +346,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 3,
         "power_w": 176.3,
-        "cadence_spm": 3,
+        "cadence_spm": 172,
         "ground_contact_ms": 247.0,
         "vertical_oscillation_cm": 8.5,
-        "stride_length_m": 1.001,
+        "stride_length_m": 1.0,
         "gcb_left_pct": 50.2
       },
       {
@@ -361,10 +361,10 @@
         "max_hr_bpm": 157,
         "elevation_gain_m": 4,
         "power_w": 153.7,
-        "cadence_spm": 3,
+        "cadence_spm": 161,
         "ground_contact_ms": 246.0,
         "vertical_oscillation_cm": 8.4,
-        "stride_length_m": 0.917,
+        "stride_length_m": 0.92,
         "gcb_left_pct": 50.0
       },
       {
@@ -376,10 +376,10 @@
         "max_hr_bpm": 157,
         "elevation_gain_m": 0,
         "power_w": 178.8,
-        "cadence_spm": 3,
+        "cadence_spm": 175,
         "ground_contact_ms": 242.0,
         "vertical_oscillation_cm": 8.2,
-        "stride_length_m": 1.009,
+        "stride_length_m": 1.01,
         "gcb_left_pct": 50.4
       },
       {
@@ -391,10 +391,10 @@
         "max_hr_bpm": 162,
         "elevation_gain_m": 6,
         "power_w": 178.9,
-        "cadence_spm": 3,
+        "cadence_spm": 173,
         "ground_contact_ms": 241.0,
         "vertical_oscillation_cm": 8.3,
-        "stride_length_m": 0.996,
+        "stride_length_m": 1.0,
         "gcb_left_pct": 50.5
       },
       {
@@ -406,10 +406,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 0,
         "power_w": 179.6,
-        "cadence_spm": 3,
+        "cadence_spm": 169,
         "ground_contact_ms": 250.0,
         "vertical_oscillation_cm": 8.6,
-        "stride_length_m": 1.032,
+        "stride_length_m": 1.03,
         "gcb_left_pct": 50.5
       },
       {
@@ -421,10 +421,10 @@
         "max_hr_bpm": 166,
         "elevation_gain_m": 7,
         "power_w": 144.7,
-        "cadence_spm": 2,
+        "cadence_spm": 148,
         "ground_contact_ms": 263.0,
         "vertical_oscillation_cm": 9.3,
-        "stride_length_m": 0.952,
+        "stride_length_m": 0.95,
         "gcb_left_pct": 50.2
       },
       {
@@ -436,10 +436,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 12,
         "power_w": 173.8,
-        "cadence_spm": 3,
+        "cadence_spm": 175,
         "ground_contact_ms": 239.0,
         "vertical_oscillation_cm": 8.1,
-        "stride_length_m": 0.958,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 50.3
       },
       {
@@ -451,10 +451,10 @@
         "max_hr_bpm": 166,
         "elevation_gain_m": 59,
         "power_w": 146.4,
-        "cadence_spm": 2,
+        "cadence_spm": 142,
         "ground_contact_ms": 272.0,
         "vertical_oscillation_cm": 9.9,
-        "stride_length_m": 0.801,
+        "stride_length_m": 0.8,
         "gcb_left_pct": 49.6
       },
       {
@@ -466,10 +466,10 @@
         "max_hr_bpm": 165,
         "elevation_gain_m": 73,
         "power_w": 170.5,
-        "cadence_spm": 3,
+        "cadence_spm": 167,
         "ground_contact_ms": 236.0,
         "vertical_oscillation_cm": 8.5,
-        "stride_length_m": 0.764,
+        "stride_length_m": 0.76,
         "gcb_left_pct": 51.0
       },
       {
@@ -481,10 +481,10 @@
         "max_hr_bpm": 174,
         "elevation_gain_m": 8,
         "power_w": 159.1,
-        "cadence_spm": 3,
+        "cadence_spm": 163,
         "ground_contact_ms": 223.0,
         "vertical_oscillation_cm": 7.7,
-        "stride_length_m": 0.962,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 50.0
       },
       {
@@ -496,10 +496,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 4,
         "power_w": 168.8,
-        "cadence_spm": 3,
+        "cadence_spm": 176,
         "ground_contact_ms": 234.0,
         "vertical_oscillation_cm": 8.0,
-        "stride_length_m": 0.983,
+        "stride_length_m": 0.98,
         "gcb_left_pct": 50.5
       },
       {
@@ -511,10 +511,10 @@
         "max_hr_bpm": 163,
         "elevation_gain_m": 45,
         "power_w": 158.6,
-        "cadence_spm": 3,
+        "cadence_spm": 151,
         "ground_contact_ms": 260.0,
         "vertical_oscillation_cm": 9.3,
-        "stride_length_m": 0.845,
+        "stride_length_m": 0.84,
         "gcb_left_pct": 49.0
       },
       {
@@ -526,10 +526,10 @@
         "max_hr_bpm": 153,
         "elevation_gain_m": 3,
         "power_w": 170.6,
-        "cadence_spm": 3,
+        "cadence_spm": 191,
         "ground_contact_ms": 202.0,
         "vertical_oscillation_cm": 6.8,
-        "stride_length_m": 1.116,
+        "stride_length_m": 1.12,
         "gcb_left_pct": 50.2
       },
       {
@@ -541,10 +541,10 @@
         "max_hr_bpm": 155,
         "elevation_gain_m": 6,
         "power_w": 155.4,
-        "cadence_spm": 3,
+        "cadence_spm": 164,
         "ground_contact_ms": 225.0,
         "vertical_oscillation_cm": 7.7,
-        "stride_length_m": 1.112,
+        "stride_length_m": 1.11,
         "gcb_left_pct": 50.4
       },
       {
@@ -556,10 +556,10 @@
         "max_hr_bpm": 159,
         "elevation_gain_m": 4,
         "power_w": 172.3,
-        "cadence_spm": 3,
+        "cadence_spm": 178,
         "ground_contact_ms": 227.0,
         "vertical_oscillation_cm": 7.6,
-        "stride_length_m": 0.999,
+        "stride_length_m": 1.0,
         "gcb_left_pct": 50.4
       },
       {
@@ -571,10 +571,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 13,
         "power_w": 184.5,
-        "cadence_spm": 3,
+        "cadence_spm": 182,
         "ground_contact_ms": 220.0,
         "vertical_oscillation_cm": 7.5,
-        "stride_length_m": 0.973,
+        "stride_length_m": 0.97,
         "gcb_left_pct": 50.7
       },
       {
@@ -586,10 +586,10 @@
         "max_hr_bpm": 164,
         "elevation_gain_m": 11,
         "power_w": 168.5,
-        "cadence_spm": 3,
+        "cadence_spm": 158,
         "ground_contact_ms": 228.0,
         "vertical_oscillation_cm": 8.1,
-        "stride_length_m": 0.967,
+        "stride_length_m": 0.97,
         "gcb_left_pct": 50.2
       },
       {
@@ -601,10 +601,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 39,
         "power_w": 160.1,
-        "cadence_spm": 3,
+        "cadence_spm": 163,
         "ground_contact_ms": 247.0,
         "vertical_oscillation_cm": 8.6,
-        "stride_length_m": 0.842,
+        "stride_length_m": 0.84,
         "gcb_left_pct": 49.3
       },
       {
@@ -616,10 +616,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 94,
         "power_w": 144.4,
-        "cadence_spm": 2,
+        "cadence_spm": 130,
         "ground_contact_ms": 290.0,
         "vertical_oscillation_cm": 11.0,
-        "stride_length_m": 0.785,
+        "stride_length_m": 0.78,
         "gcb_left_pct": 49.1
       },
       {
@@ -631,10 +631,10 @@
         "max_hr_bpm": 164,
         "elevation_gain_m": 77,
         "power_w": 152.2,
-        "cadence_spm": 2,
+        "cadence_spm": 140,
         "ground_contact_ms": 272.0,
         "vertical_oscillation_cm": 10.1,
-        "stride_length_m": 0.793,
+        "stride_length_m": 0.79,
         "gcb_left_pct": 49.2
       },
       {
@@ -646,10 +646,10 @@
         "max_hr_bpm": 159,
         "elevation_gain_m": 31,
         "power_w": 171.1,
-        "cadence_spm": 3,
+        "cadence_spm": 172,
         "ground_contact_ms": 226.0,
         "vertical_oscillation_cm": 8.0,
-        "stride_length_m": 0.988,
+        "stride_length_m": 0.99,
         "gcb_left_pct": 50.5
       },
       {
@@ -661,10 +661,10 @@
         "max_hr_bpm": 158,
         "elevation_gain_m": 39,
         "power_w": 142.8,
-        "cadence_spm": 2,
+        "cadence_spm": 148,
         "ground_contact_ms": 247.0,
         "vertical_oscillation_cm": 8.9,
-        "stride_length_m": 0.917,
+        "stride_length_m": 0.92,
         "gcb_left_pct": 49.4
       },
       {
@@ -676,10 +676,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 24,
         "power_w": 165.8,
-        "cadence_spm": 3,
+        "cadence_spm": 178,
         "ground_contact_ms": 228.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 0.958,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 50.7
       },
       {
@@ -691,10 +691,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 80,
         "power_w": 138.0,
-        "cadence_spm": 2,
+        "cadence_spm": 127,
         "ground_contact_ms": 294.0,
         "vertical_oscillation_cm": 10.8,
-        "stride_length_m": 0.792,
+        "stride_length_m": 0.79,
         "gcb_left_pct": 49.4
       },
       {
@@ -706,10 +706,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 4,
         "power_w": 162.8,
-        "cadence_spm": 3,
+        "cadence_spm": 187,
         "ground_contact_ms": 217.0,
         "vertical_oscillation_cm": 7.4,
-        "stride_length_m": 1.075,
+        "stride_length_m": 1.08,
         "gcb_left_pct": 50.0
       },
       {
@@ -721,10 +721,10 @@
         "max_hr_bpm": 164,
         "elevation_gain_m": 56,
         "power_w": 166.3,
-        "cadence_spm": 3,
+        "cadence_spm": 164,
         "ground_contact_ms": 238.0,
         "vertical_oscillation_cm": 8.8,
-        "stride_length_m": 0.807,
+        "stride_length_m": 0.81,
         "gcb_left_pct": 50.0
       },
       {
@@ -736,10 +736,10 @@
         "max_hr_bpm": 162,
         "elevation_gain_m": 4,
         "power_w": 164.3,
-        "cadence_spm": 3,
+        "cadence_spm": 186,
         "ground_contact_ms": 218.0,
         "vertical_oscillation_cm": 7.2,
-        "stride_length_m": 1.175,
+        "stride_length_m": 1.18,
         "gcb_left_pct": 50.2
       },
       {
@@ -751,10 +751,10 @@
         "max_hr_bpm": 162,
         "elevation_gain_m": 11,
         "power_w": 158.7,
-        "cadence_spm": 2,
+        "cadence_spm": 148,
         "ground_contact_ms": 241.0,
         "vertical_oscillation_cm": 8.5,
-        "stride_length_m": 0.929,
+        "stride_length_m": 0.93,
         "gcb_left_pct": 50.4
       },
       {
@@ -766,10 +766,10 @@
         "max_hr_bpm": 165,
         "elevation_gain_m": 17,
         "power_w": 189.0,
-        "cadence_spm": 3,
+        "cadence_spm": 177,
         "ground_contact_ms": 232.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 1.001,
+        "stride_length_m": 1.0,
         "gcb_left_pct": 50.3
       },
       {
@@ -781,10 +781,10 @@
         "max_hr_bpm": 165,
         "elevation_gain_m": 93,
         "power_w": 140.1,
-        "cadence_spm": 2,
+        "cadence_spm": 130,
         "ground_contact_ms": 295.0,
         "vertical_oscillation_cm": 11.2,
-        "stride_length_m": 0.754,
+        "stride_length_m": 0.75,
         "gcb_left_pct": 50.9
       },
       {
@@ -796,10 +796,10 @@
         "max_hr_bpm": 154,
         "elevation_gain_m": 19,
         "power_w": 141.6,
-        "cadence_spm": 3,
+        "cadence_spm": 167,
         "ground_contact_ms": 233.0,
         "vertical_oscillation_cm": 8.2,
-        "stride_length_m": 0.977,
+        "stride_length_m": 0.98,
         "gcb_left_pct": 49.7
       },
       {
@@ -811,10 +811,10 @@
         "max_hr_bpm": 145,
         "elevation_gain_m": 0,
         "power_w": 144.3,
-        "cadence_spm": 3,
+        "cadence_spm": 178,
         "ground_contact_ms": 210.0,
         "vertical_oscillation_cm": 7.0,
-        "stride_length_m": 0.992,
+        "stride_length_m": 0.99,
         "gcb_left_pct": 49.6
       },
       {
@@ -826,10 +826,10 @@
         "max_hr_bpm": 147,
         "elevation_gain_m": 0,
         "power_w": 163.4,
-        "cadence_spm": 3,
+        "cadence_spm": 191,
         "ground_contact_ms": 198.0,
         "vertical_oscillation_cm": 6.8,
-        "stride_length_m": 1.161,
+        "stride_length_m": 1.16,
         "gcb_left_pct": 50.3
       },
       {
@@ -841,10 +841,10 @@
         "max_hr_bpm": 150,
         "elevation_gain_m": 0,
         "power_w": 175.6,
-        "cadence_spm": 3,
+        "cadence_spm": 187,
         "ground_contact_ms": 208.0,
         "vertical_oscillation_cm": 7.1,
-        "stride_length_m": 1.095,
+        "stride_length_m": 1.1,
         "gcb_left_pct": 50.2
       },
       {
@@ -856,10 +856,10 @@
         "max_hr_bpm": 157,
         "elevation_gain_m": 19,
         "power_w": 154.2,
-        "cadence_spm": 3,
+        "cadence_spm": 164,
         "ground_contact_ms": 232.0,
         "vertical_oscillation_cm": 8.1,
-        "stride_length_m": 0.845,
+        "stride_length_m": 0.85,
         "gcb_left_pct": 50.8
       },
       {
@@ -871,10 +871,10 @@
         "max_hr_bpm": 159,
         "elevation_gain_m": 51,
         "power_w": 151.6,
-        "cadence_spm": 3,
+        "cadence_spm": 157,
         "ground_contact_ms": 249.0,
         "vertical_oscillation_cm": 9.2,
-        "stride_length_m": 0.817,
+        "stride_length_m": 0.82,
         "gcb_left_pct": 49.0
       },
       {
@@ -886,10 +886,10 @@
         "max_hr_bpm": 153,
         "elevation_gain_m": 12,
         "power_w": 155.6,
-        "cadence_spm": 3,
+        "cadence_spm": 182,
         "ground_contact_ms": 205.0,
         "vertical_oscillation_cm": 7.0,
-        "stride_length_m": 1.093,
+        "stride_length_m": 1.09,
         "gcb_left_pct": 50.2
       },
       {
@@ -901,10 +901,10 @@
         "max_hr_bpm": 158,
         "elevation_gain_m": 7,
         "power_w": 174.9,
-        "cadence_spm": 3,
+        "cadence_spm": 179,
         "ground_contact_ms": 214.0,
         "vertical_oscillation_cm": 7.2,
-        "stride_length_m": 1.017,
+        "stride_length_m": 1.02,
         "gcb_left_pct": 51.3
       },
       {
@@ -916,10 +916,10 @@
         "max_hr_bpm": 161,
         "elevation_gain_m": 76,
         "power_w": 139.2,
-        "cadence_spm": 2,
+        "cadence_spm": 137,
         "ground_contact_ms": 255.0,
         "vertical_oscillation_cm": 9.2,
-        "stride_length_m": 0.845,
+        "stride_length_m": 0.84,
         "gcb_left_pct": 50.1
       },
       {
@@ -931,10 +931,10 @@
         "max_hr_bpm": 157,
         "elevation_gain_m": 30,
         "power_w": 138.0,
-        "cadence_spm": 2,
+        "cadence_spm": 141,
         "ground_contact_ms": 263.0,
         "vertical_oscillation_cm": 9.4,
-        "stride_length_m": 0.892,
+        "stride_length_m": 0.89,
         "gcb_left_pct": 50.6
       },
       {
@@ -946,10 +946,10 @@
         "max_hr_bpm": 163,
         "elevation_gain_m": 29,
         "power_w": 169.6,
-        "cadence_spm": 3,
+        "cadence_spm": 181,
         "ground_contact_ms": 207.0,
         "vertical_oscillation_cm": 7.3,
-        "stride_length_m": 0.866,
+        "stride_length_m": 0.87,
         "gcb_left_pct": 50.7
       },
       {
@@ -961,10 +961,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 34,
         "power_w": 137.1,
-        "cadence_spm": 2,
+        "cadence_spm": 150,
         "ground_contact_ms": 232.0,
         "vertical_oscillation_cm": 8.3,
-        "stride_length_m": 0.928,
+        "stride_length_m": 0.93,
         "gcb_left_pct": 50.4
       },
       {
@@ -976,10 +976,10 @@
         "max_hr_bpm": 149,
         "elevation_gain_m": 0,
         "power_w": 167.3,
-        "cadence_spm": 3,
+        "cadence_spm": 200,
         "ground_contact_ms": 197.0,
         "vertical_oscillation_cm": 6.3,
-        "stride_length_m": 1.212,
+        "stride_length_m": 1.21,
         "gcb_left_pct": 50.2
       },
       {
@@ -991,10 +991,10 @@
         "max_hr_bpm": 144,
         "elevation_gain_m": 0,
         "power_w": 158.6,
-        "cadence_spm": 3,
+        "cadence_spm": 196,
         "ground_contact_ms": 197.0,
         "vertical_oscillation_cm": 6.5,
-        "stride_length_m": 1.168,
+        "stride_length_m": 1.17,
         "gcb_left_pct": 50.8
       },
       {
@@ -1006,10 +1006,10 @@
         "max_hr_bpm": 148,
         "elevation_gain_m": 0,
         "power_w": 162.8,
-        "cadence_spm": 3,
+        "cadence_spm": 188,
         "ground_contact_ms": 208.0,
         "vertical_oscillation_cm": 7.1,
-        "stride_length_m": 0.981,
+        "stride_length_m": 0.98,
         "gcb_left_pct": 51.2
       },
       {
@@ -1021,10 +1021,10 @@
         "max_hr_bpm": 148,
         "elevation_gain_m": 0,
         "power_w": 168.9,
-        "cadence_spm": 3,
+        "cadence_spm": 188,
         "ground_contact_ms": 208.0,
         "vertical_oscillation_cm": 7.1,
-        "stride_length_m": 1.183,
+        "stride_length_m": 1.18,
         "gcb_left_pct": 50.4
       },
       {
@@ -1036,10 +1036,10 @@
         "max_hr_bpm": 155,
         "elevation_gain_m": 5,
         "power_w": 148.9,
-        "cadence_spm": 3,
+        "cadence_spm": 163,
         "ground_contact_ms": 225.0,
         "vertical_oscillation_cm": 8.1,
-        "stride_length_m": 0.889,
+        "stride_length_m": 0.89,
         "gcb_left_pct": 49.5
       },
       {
@@ -1051,10 +1051,10 @@
         "max_hr_bpm": 156,
         "elevation_gain_m": 17,
         "power_w": 184.0,
-        "cadence_spm": 3,
+        "cadence_spm": 182,
         "ground_contact_ms": 215.0,
         "vertical_oscillation_cm": 7.4,
-        "stride_length_m": 0.917,
+        "stride_length_m": 0.92,
         "gcb_left_pct": 50.4
       },
       {
@@ -1066,10 +1066,10 @@
         "max_hr_bpm": 159,
         "elevation_gain_m": 32,
         "power_w": 140.5,
-        "cadence_spm": 2,
+        "cadence_spm": 148,
         "ground_contact_ms": 261.0,
         "vertical_oscillation_cm": 9.4,
-        "stride_length_m": 0.839,
+        "stride_length_m": 0.84,
         "gcb_left_pct": 49.7
       },
       {
@@ -1081,7 +1081,7 @@
         "max_hr_bpm": 156,
         "elevation_gain_m": 24,
         "power_w": 169.2,
-        "cadence_spm": 3,
+        "cadence_spm": 178,
         "ground_contact_ms": 216.0,
         "vertical_oscillation_cm": 7.7,
         "stride_length_m": 0.89,
@@ -1096,10 +1096,10 @@
         "max_hr_bpm": 152,
         "elevation_gain_m": 8,
         "power_w": 167.3,
-        "cadence_spm": 3,
+        "cadence_spm": 179,
         "ground_contact_ms": 223.0,
         "vertical_oscillation_cm": 7.7,
-        "stride_length_m": 0.995,
+        "stride_length_m": 1.0,
         "gcb_left_pct": 50.5
       },
       {
@@ -1111,10 +1111,10 @@
         "max_hr_bpm": 151,
         "elevation_gain_m": 3,
         "power_w": 164.1,
-        "cadence_spm": 3,
+        "cadence_spm": 189,
         "ground_contact_ms": 203.0,
         "vertical_oscillation_cm": 7.1,
-        "stride_length_m": 1.012,
+        "stride_length_m": 1.01,
         "gcb_left_pct": 50.4
       },
       {
@@ -1126,10 +1126,10 @@
         "max_hr_bpm": 152,
         "elevation_gain_m": 15,
         "power_w": 152.5,
-        "cadence_spm": 3,
+        "cadence_spm": 169,
         "ground_contact_ms": 230.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 0.886,
+        "stride_length_m": 0.89,
         "gcb_left_pct": 50.1
       },
       {
@@ -1141,10 +1141,10 @@
         "max_hr_bpm": 153,
         "elevation_gain_m": 22,
         "power_w": 130.5,
-        "cadence_spm": 2,
+        "cadence_spm": 148,
         "ground_contact_ms": 230.0,
         "vertical_oscillation_cm": 8.3,
-        "stride_length_m": 0.771,
+        "stride_length_m": 0.77,
         "gcb_left_pct": 49.2
       },
       {
@@ -1156,7 +1156,7 @@
         "max_hr_bpm": 144,
         "elevation_gain_m": 29,
         "power_w": 146.1,
-        "cadence_spm": 3,
+        "cadence_spm": 161,
         "ground_contact_ms": 235.0,
         "vertical_oscillation_cm": 8.5,
         "stride_length_m": 0.89,
@@ -1171,7 +1171,7 @@
         "max_hr_bpm": 137,
         "elevation_gain_m": 11,
         "power_w": 125.1,
-        "cadence_spm": 3,
+        "cadence_spm": 155,
         "ground_contact_ms": 216.0,
         "vertical_oscillation_cm": 7.9,
         "stride_length_m": 0.81,
@@ -1186,10 +1186,10 @@
         "max_hr_bpm": 137,
         "elevation_gain_m": 21,
         "power_w": 119.1,
-        "cadence_spm": 2,
+        "cadence_spm": 142,
         "ground_contact_ms": 262.0,
         "vertical_oscillation_cm": 9.6,
-        "stride_length_m": 0.847,
+        "stride_length_m": 0.85,
         "gcb_left_pct": 49.4
       },
       {
@@ -1201,10 +1201,10 @@
         "max_hr_bpm": 138,
         "elevation_gain_m": 18,
         "power_w": 142.2,
-        "cadence_spm": 3,
+        "cadence_spm": 161,
         "ground_contact_ms": 227.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 0.834,
+        "stride_length_m": 0.83,
         "gcb_left_pct": 50.5
       },
       {
@@ -1216,10 +1216,10 @@
         "max_hr_bpm": 134,
         "elevation_gain_m": 18,
         "power_w": 113.0,
-        "cadence_spm": 2,
+        "cadence_spm": 141,
         "ground_contact_ms": 243.0,
         "vertical_oscillation_cm": 8.7,
-        "stride_length_m": 0.728,
+        "stride_length_m": 0.73,
         "gcb_left_pct": 49.8
       },
       {
@@ -1231,10 +1231,10 @@
         "max_hr_bpm": 135,
         "elevation_gain_m": 28,
         "power_w": 127.1,
-        "cadence_spm": 2,
+        "cadence_spm": 143,
         "ground_contact_ms": 267.0,
         "vertical_oscillation_cm": 9.9,
-        "stride_length_m": 0.884,
+        "stride_length_m": 0.88,
         "gcb_left_pct": 49.5
       },
       {
@@ -1246,10 +1246,10 @@
         "max_hr_bpm": 133,
         "elevation_gain_m": 21,
         "power_w": 131.3,
-        "cadence_spm": 3,
+        "cadence_spm": 154,
         "ground_contact_ms": 246.0,
         "vertical_oscillation_cm": 8.9,
-        "stride_length_m": 0.904,
+        "stride_length_m": 0.9,
         "gcb_left_pct": 49.0
       },
       {
@@ -1261,10 +1261,10 @@
         "max_hr_bpm": 136,
         "elevation_gain_m": 45,
         "power_w": 116.5,
-        "cadence_spm": 2,
+        "cadence_spm": 133,
         "ground_contact_ms": 275.0,
         "vertical_oscillation_cm": 10.2,
-        "stride_length_m": 0.732,
+        "stride_length_m": 0.73,
         "gcb_left_pct": 50.7
       },
       {
@@ -1276,10 +1276,10 @@
         "max_hr_bpm": 149,
         "elevation_gain_m": 39,
         "power_w": 150.2,
-        "cadence_spm": 3,
+        "cadence_spm": 160,
         "ground_contact_ms": 237.0,
         "vertical_oscillation_cm": 8.4,
-        "stride_length_m": 0.898,
+        "stride_length_m": 0.9,
         "gcb_left_pct": 49.6
       },
       {
@@ -1291,10 +1291,10 @@
         "max_hr_bpm": 154,
         "elevation_gain_m": 56,
         "power_w": 156.1,
-        "cadence_spm": 3,
+        "cadence_spm": 155,
         "ground_contact_ms": 233.0,
         "vertical_oscillation_cm": 8.5,
-        "stride_length_m": 1.011,
+        "stride_length_m": 1.01,
         "gcb_left_pct": 48.6
       },
       {
@@ -1306,10 +1306,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 35,
         "power_w": 166.8,
-        "cadence_spm": 3,
+        "cadence_spm": 172,
         "ground_contact_ms": 222.0,
         "vertical_oscillation_cm": 7.6,
-        "stride_length_m": 1.124,
+        "stride_length_m": 1.12,
         "gcb_left_pct": 48.8
       },
       {
@@ -1321,7 +1321,7 @@
         "max_hr_bpm": 144,
         "elevation_gain_m": 0,
         "power_w": 149.9,
-        "cadence_spm": 3,
+        "cadence_spm": 167,
         "ground_contact_ms": 210.0,
         "vertical_oscillation_cm": 7.0,
         "stride_length_m": 1.29,
@@ -1336,10 +1336,10 @@
         "max_hr_bpm": 145,
         "elevation_gain_m": 0,
         "power_w": 160.7,
-        "cadence_spm": 3,
+        "cadence_spm": 197,
         "ground_contact_ms": 199.0,
         "vertical_oscillation_cm": 6.4,
-        "stride_length_m": 1.193,
+        "stride_length_m": 1.19,
         "gcb_left_pct": 50.2
       },
       {
@@ -1351,7 +1351,7 @@
         "max_hr_bpm": 153,
         "elevation_gain_m": 4,
         "power_w": 161.2,
-        "cadence_spm": 3,
+        "cadence_spm": 187,
         "ground_contact_ms": 213.0,
         "vertical_oscillation_cm": 7.1,
         "stride_length_m": 0.93,
@@ -1366,10 +1366,10 @@
         "max_hr_bpm": 145,
         "elevation_gain_m": 0,
         "power_w": 152.1,
-        "cadence_spm": 3,
+        "cadence_spm": 179,
         "ground_contact_ms": 213.0,
         "vertical_oscillation_cm": 7.4,
-        "stride_length_m": 1.019,
+        "stride_length_m": 1.02,
         "gcb_left_pct": 50.2
       },
       {
@@ -1381,10 +1381,10 @@
         "max_hr_bpm": 146,
         "elevation_gain_m": 19,
         "power_w": 124.6,
-        "cadence_spm": 2,
+        "cadence_spm": 142,
         "ground_contact_ms": 264.0,
         "vertical_oscillation_cm": 9.4,
-        "stride_length_m": 0.853,
+        "stride_length_m": 0.85,
         "gcb_left_pct": 49.7
       },
       {
@@ -1396,10 +1396,10 @@
         "max_hr_bpm": 151,
         "elevation_gain_m": 16,
         "power_w": 152.7,
-        "cadence_spm": 3,
+        "cadence_spm": 163,
         "ground_contact_ms": 238.0,
         "vertical_oscillation_cm": 8.6,
-        "stride_length_m": 0.976,
+        "stride_length_m": 0.98,
         "gcb_left_pct": 49.8
       },
       {
@@ -1411,10 +1411,10 @@
         "max_hr_bpm": 147,
         "elevation_gain_m": 53,
         "power_w": 133.9,
-        "cadence_spm": 2,
+        "cadence_spm": 143,
         "ground_contact_ms": 263.0,
         "vertical_oscillation_cm": 9.6,
-        "stride_length_m": 0.802,
+        "stride_length_m": 0.8,
         "gcb_left_pct": 46.6
       },
       {
@@ -1426,10 +1426,10 @@
         "max_hr_bpm": 145,
         "elevation_gain_m": 22,
         "power_w": 141.3,
-        "cadence_spm": 3,
+        "cadence_spm": 164,
         "ground_contact_ms": 236.0,
         "vertical_oscillation_cm": 8.2,
-        "stride_length_m": 0.957,
+        "stride_length_m": 0.96,
         "gcb_left_pct": 49.0
       },
       {
@@ -1441,10 +1441,10 @@
         "max_hr_bpm": 150,
         "elevation_gain_m": 0,
         "power_w": 163.8,
-        "cadence_spm": 3,
+        "cadence_spm": 176,
         "ground_contact_ms": 228.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 1.046,
+        "stride_length_m": 1.05,
         "gcb_left_pct": 50.4
       },
       {
@@ -1456,10 +1456,10 @@
         "max_hr_bpm": 149,
         "elevation_gain_m": 3,
         "power_w": 150.5,
-        "cadence_spm": 3,
+        "cadence_spm": 170,
         "ground_contact_ms": 230.0,
         "vertical_oscillation_cm": 8.0,
-        "stride_length_m": 0.945,
+        "stride_length_m": 0.95,
         "gcb_left_pct": 50.1
       },
       {
@@ -1471,10 +1471,10 @@
         "max_hr_bpm": 146,
         "elevation_gain_m": 10,
         "power_w": 118.9,
-        "cadence_spm": 2,
+        "cadence_spm": 149,
         "ground_contact_ms": 261.0,
         "vertical_oscillation_cm": 9.3,
-        "stride_length_m": 0.764,
+        "stride_length_m": 0.76,
         "gcb_left_pct": 49.0
       },
       {
@@ -1486,10 +1486,10 @@
         "max_hr_bpm": 149,
         "elevation_gain_m": 4,
         "power_w": 168.0,
-        "cadence_spm": 3,
+        "cadence_spm": 178,
         "ground_contact_ms": 235.0,
         "vertical_oscillation_cm": 7.9,
-        "stride_length_m": 0.952,
+        "stride_length_m": 0.95,
         "gcb_left_pct": 50.5
       },
       {
@@ -1501,7 +1501,7 @@
         "max_hr_bpm": 150,
         "elevation_gain_m": 0,
         "power_w": 155.4,
-        "cadence_spm": 3,
+        "cadence_spm": 169,
         "ground_contact_ms": 248.0,
         "vertical_oscillation_cm": 8.6,
         "stride_length_m": 0.94,
@@ -1516,10 +1516,10 @@
         "max_hr_bpm": 146,
         "elevation_gain_m": 2,
         "power_w": 136.9,
-        "cadence_spm": 3,
+        "cadence_spm": 160,
         "ground_contact_ms": 249.0,
         "vertical_oscillation_cm": 8.7,
-        "stride_length_m": 0.866,
+        "stride_length_m": 0.87,
         "gcb_left_pct": 49.5
       },
       {
@@ -1531,7 +1531,7 @@
         "max_hr_bpm": 144,
         "elevation_gain_m": 2,
         "power_w": 118.2,
-        "cadence_spm": 2,
+        "cadence_spm": 138,
         "ground_contact_ms": 274.0,
         "vertical_oscillation_cm": 9.7,
         "stride_length_m": 0.82,
@@ -1546,10 +1546,10 @@
         "max_hr_bpm": 160,
         "elevation_gain_m": 6,
         "power_w": 144.0,
-        "cadence_spm": 2,
+        "cadence_spm": 149,
         "ground_contact_ms": 273.0,
         "vertical_oscillation_cm": 9.5,
-        "stride_length_m": 0.931,
+        "stride_length_m": 0.93,
         "gcb_left_pct": 49.2
       },
       {
@@ -1561,10 +1561,10 @@
         "max_hr_bpm": 165,
         "elevation_gain_m": 0,
         "power_w": 81.8,
-        "cadence_spm": 2,
+        "cadence_spm": 112,
         "ground_contact_ms": 283.0,
         "vertical_oscillation_cm": 10.7,
-        "stride_length_m": 0.756,
+        "stride_length_m": 0.76,
         "gcb_left_pct": 51.5
       }
     ]
