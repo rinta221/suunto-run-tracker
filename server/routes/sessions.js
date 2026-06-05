@@ -10,7 +10,8 @@ const EDITABLE_COLS = [
   'cadence_score','energy_kcal','title','trimp','vo2max',
   'ground_contact_ms','gcb_left_pct','vertical_oscillation_cm',
   'cadence_max_spm','cadence_avg_spm','stride_length_cm','gc_balance',
-  'impression','claude_eval','claude_eval_at','gpt_eval','gpt_eval_at','phase_id',
+  'impression','claude_eval','claude_eval_at','gpt_eval','gpt_eval_at',
+  'claude_eval_locked','gpt_eval_locked','phase_id',
 ];
 
 // GET /api/sessions/months

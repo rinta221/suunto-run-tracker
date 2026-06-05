@@ -215,6 +215,10 @@ body {
 .btn-ai.claude:hover:not(:disabled) { background: #fef3c7; }
 .btn-ai.gpt { border-color: #059669; color: #064e3b; background: #ecfdf5; }
 .btn-ai.gpt:hover:not(:disabled) { background: #d1fae5; }
+.btn-lock { border-color: #2563eb; color: #1e40af; background: #eff6ff; }
+.btn-lock:hover:not(:disabled) { background: #dbeafe; }
+.btn-unlock { border-color: #9ca3af; color: #6b7280; background: #f9fafb; font-size: 10px; }
+.btn-unlock:hover:not(:disabled) { background: #f3f4f6; }
 
 /* ===== Table ===== */
 #table-container {
@@ -363,7 +367,7 @@ tr.row-phase-summary td {
   right: 0;
   top: 0;
   height: 100%;
-  width: 60vw;
+  width: 40vw;
   background: var(--surface);
   box-shadow: -4px 0 20px rgba(0,0,0,.12);
   z-index: 200;

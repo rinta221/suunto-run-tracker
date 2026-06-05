@@ -344,13 +344,14 @@ function buildSessionRow(s, isGroupStart = true, isMultiDay = false) {
       td.style.whiteSpace = 'nowrap';
     } else if (col.id === 'claude_eval' || col.id === 'gpt_eval') {
       const v = s[col.id];
+      const isLocked = !!(col.id === 'claude_eval' ? s.claude_eval_locked : s.gpt_eval_locked);
       if (v) {
         td.className += ' cell-ai';
-        td.textContent = v;
+        td.textContent = (isLocked ? '🔒 ' : '') + v;
         td.title = v;
       } else {
         td.className += ' cell-ai-empty';
-        td.textContent = '—';
+        td.textContent = isLocked ? '🔒' : '—';
       }
     } else if (col.id === 'menu' && s.source === 'ai_generated' && s.planned_menu) {
       td.className += ' cell-wrap cell-menu-ai';
@@ -569,6 +570,13 @@ function hideAutocomplete() {
 
 /* ===== AI Evaluation ===== */
 async function evaluateSession(sessionId, provider) {
+  const session = S.sessions.find(s => s.id === sessionId);
+  const lockField = provider === 'claude' ? 'claude_eval_locked' : 'gpt_eval_locked';
+  if (session && session[lockField]) {
+    toast(`${provider === 'claude' ? 'Claude' : 'GPT'} 評価はロックされています 🔒`, 'error');
+    return;
+  }
+
   const tr = document.querySelector(`tr[data-id="${sessionId}"]`);
   if (!tr) return;
 
@@ -610,6 +618,19 @@ async function evaluateSession(sessionId, provider) {
   } finally {
     if (btn) btn.disabled = false;
   }
+}
+
+async function lockEval(sessionId, provider, lock) {
+  if (!lock && !confirm(`${provider === 'claude' ? 'Claude' : 'GPT'} 評価のロックを解除しますか？`)) return;
+  const field = provider === 'claude' ? 'claude_eval_locked' : 'gpt_eval_locked';
+  try {
+    await api.patch('/api/sessions/' + sessionId, { [field]: lock ? 1 : 0 });
+    const idx = S.sessions.findIndex(s => s.id === sessionId);
+    if (idx !== -1) S.sessions[idx][field] = lock ? 1 : 0;
+    renderTbody();
+    toast(lock ? '評価を確定しました 🔒' : 'ロックを解除しました', 'success');
+    if (S.activePanel === sessionId) refreshDetailPanel(sessionId);
+  } catch(e) { toast('エラー: ' + e.message, 'error'); }
 }
 
 async function bulkEvaluate(provider) {
@@ -714,11 +735,37 @@ function buildDetailContent(s, laps) {
     ${buildBioStatsHtml(s)}
   ` : '';
 
+  const claudeLocked = !!s.claude_eval_locked;
+  const gptLocked = !!s.gpt_eval_locked;
+
+  const claudeLockBtn = s.claude_eval
+    ? (claudeLocked
+        ? `<button class="btn btn-sm btn-unlock" data-action="unlock-eval" data-provider="claude" data-id="${s.id}">解除</button>`
+        : `<button class="btn btn-sm btn-lock" data-action="lock-eval" data-provider="claude" data-id="${s.id}">確定</button>`)
+    : '';
+  const gptLockBtn = s.gpt_eval
+    ? (gptLocked
+        ? `<button class="btn btn-sm btn-unlock" data-action="unlock-eval" data-provider="gpt" data-id="${s.id}">解除</button>`
+        : `<button class="btn btn-sm btn-lock" data-action="lock-eval" data-provider="gpt" data-id="${s.id}">確定</button>`)
+    : '';
+
   const claudeHtml = s.claude_eval
-    ? `<div class="ai-eval-block"><div class="ai-header claude">🤖 Claude 客観評価（${s.claude_eval_at ? s.claude_eval_at.slice(0,10) : ''}）</div>${escHtml(s.claude_eval)}</div>`
+    ? `<div class="ai-eval-block">
+         <div class="ai-header claude" style="display:flex;align-items:center;justify-content:space-between">
+           <span>🤖 Claude 客観評価（${s.claude_eval_at ? s.claude_eval_at.slice(0,10) : ''}）${claudeLocked ? ' 🔒' : ''}</span>
+           ${claudeLockBtn}
+         </div>
+         ${escHtml(s.claude_eval)}
+       </div>`
     : `<div class="ai-eval-block"><div class="ai-header claude">🤖 Claude 客観評価</div><span style="color:var(--text-light)">未評価</span></div>`;
   const gptHtml = s.gpt_eval
-    ? `<div class="ai-eval-block"><div class="ai-header gpt">🟢 GPT コーチング（${s.gpt_eval_at ? s.gpt_eval_at.slice(0,10) : ''}）</div>${escHtml(s.gpt_eval)}</div>`
+    ? `<div class="ai-eval-block">
+         <div class="ai-header gpt" style="display:flex;align-items:center;justify-content:space-between">
+           <span>🟢 GPT コーチング（${s.gpt_eval_at ? s.gpt_eval_at.slice(0,10) : ''}）${gptLocked ? ' 🔒' : ''}</span>
+           ${gptLockBtn}
+         </div>
+         ${escHtml(s.gpt_eval)}
+       </div>`
     : `<div class="ai-eval-block"><div class="ai-header gpt">🟢 GPT コーチング</div><span style="color:var(--text-light)">未評価</span></div>`;
 
   const shoesOptions = S.shoes.filter(sh => sh.is_active)
@@ -755,8 +802,8 @@ function buildDetailContent(s, laps) {
     <div class="detail-section">
       <h3>AI評価</h3>
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button class="btn btn-sm btn-ai claude" data-action="eval-claude" data-id="${s.id}" style="flex:1">Claude 評価</button>
-        <button class="btn btn-sm btn-ai gpt" data-action="eval-gpt" data-id="${s.id}" style="flex:1">GPT 評価</button>
+        <button class="btn btn-sm btn-ai claude" data-action="eval-claude" data-id="${s.id}" style="flex:1" ${claudeLocked ? 'disabled' : ''}>Claude 評価${claudeLocked ? ' 🔒' : ''}</button>
+        <button class="btn btn-sm btn-ai gpt" data-action="eval-gpt" data-id="${s.id}" style="flex:1" ${gptLocked ? 'disabled' : ''}>GPT 評価${gptLocked ? ' 🔒' : ''}</button>
       </div>
       ${claudeHtml}
       ${gptHtml}
@@ -920,6 +967,20 @@ function initDetailCharts(laps) {
 }
 
 function initDetailFormEvents(s) {
+  // Lock / unlock buttons
+  document.querySelectorAll('[data-action="lock-eval"],[data-action="unlock-eval"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lockEval(btn.dataset.id, btn.dataset.provider, btn.dataset.action === 'lock-eval');
+    });
+  });
+  // Detail panel AI eval buttons
+  document.querySelectorAll(`#detail-content [data-action^="eval-"]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const provider = btn.dataset.action.replace('eval-', '');
+      evaluateSession(btn.dataset.id, provider);
+    });
+  });
+
   const saveBtn = document.querySelector(`.detail-save-btn[data-save-id="${s.id}"]`);
   if (!saveBtn) return;
   saveBtn.addEventListener('click', async () => {

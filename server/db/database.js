@@ -88,4 +88,8 @@ db.exec(`
   );
 `);
 
+// Migration: add lock columns (idempotent)
+try { db.exec('ALTER TABLE sessions ADD COLUMN claude_eval_locked INTEGER DEFAULT 0'); } catch(e) {}
+try { db.exec('ALTER TABLE sessions ADD COLUMN gpt_eval_locked INTEGER DEFAULT 0'); } catch(e) {}
+
 module.exports = db;

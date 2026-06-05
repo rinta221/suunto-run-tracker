@@ -25,6 +25,13 @@ router.post('/evaluate', (req, res) => {
   const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(sessionId);
   if (!session) return res.status(404).json({ error: 'Session not found' });
 
+  if (provider === 'claude' && session.claude_eval_locked) {
+    return res.status(403).json({ error: 'Claude評価はロックされています' });
+  }
+  if (provider === 'gpt' && session.gpt_eval_locked) {
+    return res.status(403).json({ error: 'GPT評価はロックされています' });
+  }
+
   const laps = lapsStore.getLaps(sessionId);
   const lapCount = laps ? laps.length : 0;
 

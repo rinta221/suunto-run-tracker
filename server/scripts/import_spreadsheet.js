@@ -72,7 +72,8 @@ const DB_COLS = [
   'distance_km','duration_s','pace_per_km_s','avg_hr_pct','elevation_m','cadence_score','energy_kcal',
   'title','trimp','vo2max','ground_contact_ms','gcb_left_pct','vertical_oscillation_cm',
   'cadence_max_spm','cadence_avg_spm','stride_length_cm','gc_balance',
-  'impression','claude_eval','claude_eval_at','gpt_eval','gpt_eval_at','created_at','updated_at',
+  'impression','claude_eval','claude_eval_at','gpt_eval','gpt_eval_at',
+  'claude_eval_locked','gpt_eval_locked','created_at','updated_at',
 ];
 
 function importSessions(sessions, source) {
@@ -103,6 +104,10 @@ function importSessions(sessions, source) {
     if (s.session_type === undefined) s.session_type = inferSessionType(s.menu);
     if (!s.created_at) s.created_at = now;
     if (!s.updated_at) s.updated_at = now;
+    if (s.claude_eval_locked == null) s.claude_eval_locked = 0;
+    if (s.gpt_eval_locked == null) s.gpt_eval_locked = 0;
+    // スプレッドシートの gpt_eval は既存データなので初期保護
+    if (source === 'spreadsheet_sessions.json' && s.gpt_eval) s.gpt_eval_locked = 1;
 
     toInsert.push(s);
     inserted++;

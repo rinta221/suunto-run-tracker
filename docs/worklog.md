@@ -1,5 +1,16 @@
 # 作業ログ
 
+## 2026-06-05 — ドロワー幅40vw変更・AI評価ロック機構追加
+
+### 変更内容
+- 詳細パネル幅: `60vw` → `40vw`
+- sessionsテーブルに `claude_eval_locked / gpt_eval_locked` フィールド追加（ALTER TABLE マイグレーション）
+- AI評価の確定/解除ボタンをドロワーに追加（確定でボタン無効化＋🔒表示、解除は確認ダイアログあり）
+- テーブルセルのAI評価列でも 🔒 表示対応
+- `evaluateSession()` でロック状態チェック（ロック中は再評価不可）
+- `/api/ai/evaluate` サーバー側でもロックチェック（403返却）
+- `import_spreadsheet.js`: spreadsheet_sessions.json の gpt_eval 有り行は `gpt_eval_locked=1` で初期保護
+
 ## 2026-06-05 — 詳細ドロワーUI改善（幅60vw・マスク貫通・月ナビ左寄せ）
 
 ### 変更内容（設計書 7.2節 反映）
