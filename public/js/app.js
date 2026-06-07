@@ -768,9 +768,6 @@ function buildDetailContent(s, laps) {
        </div>`
     : `<div class="ai-eval-block"><div class="ai-header gpt">🟢 GPT コーチング</div><span style="color:var(--text-light)">未評価</span></div>`;
 
-  const shoesOptions = S.shoes.filter(sh => sh.is_active)
-    .map(sh => `<option value="${escAttr(sh.name)}" ${s.shoes === sh.name ? 'selected' : ''}>${escHtml(sh.name)}</option>`)
-    .join('');
 
   const lapHtml = s.activity_type === 'running' ? `
     <div class="detail-section" id="lap-section">
@@ -794,7 +791,7 @@ function buildDetailContent(s, laps) {
       <div class="detail-field"><label>練習メニュー</label><input id="dp-menu" value="${escAttr(s.menu || '')}"></div>
       <div class="detail-field"><label>メモ（練習内容）</label><textarea id="dp-memo">${escHtml(s.memo || '')}</textarea></div>
       <div class="detail-field"><label>場所</label><input id="dp-locate" value="${escAttr(s.locate || '')}"></div>
-      <div class="detail-field"><label>シューズ</label><select id="dp-shoes"><option value="">—</option>${shoesOptions}</select></div>
+      <div class="detail-field"><label>シューズ</label><input id="dp-shoes" value="${escAttr(s.shoes || '')}"></div>
       <div class="detail-field"><label>感想 ★AI送信に必須</label><textarea id="dp-impression" rows="4">${escHtml(s.impression || '')}</textarea></div>
       <button class="detail-save-btn" data-save-id="${s.id}">保存</button>
     </div>
