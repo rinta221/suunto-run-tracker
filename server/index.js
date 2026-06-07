@@ -16,6 +16,7 @@ app.use('/api/phases', require('./routes/phases'));
 app.use('/api/shoes', require('./routes/shoes'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/import', require('./routes/import'));
 
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {

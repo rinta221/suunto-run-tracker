@@ -183,12 +183,32 @@ function seedIfEmpty() {
 }
 
 function reloadLapsStore() {
-  // Re-populate in-memory laps from sample_sessions.json after server restart
-  const filePath = path.join(__dirname, '../../data/sample_sessions.json');
-  if (!fs.existsSync(filePath)) return;
-  const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  for (const s of raw) {
-    if (s.laps && s.laps.length) lapsStore.setLaps(s.id, s.laps);
+  // 1. sample_sessions.json のラップをメモリに再ロード
+  const samplePath = path.join(__dirname, '../../data/sample_sessions.json');
+  if (fs.existsSync(samplePath)) {
+    const raw = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
+    for (const s of raw) {
+      if (s.laps && s.laps.length) lapsStore.setLaps(s.id, s.laps);
+    }
+  }
+
+  // 2. data/suunto_raw/ の生JSONからラップを再ロード（date+distance+durationでセッション特定）
+  const rawDir = path.join(__dirname, '../../data/suunto_raw');
+  if (!fs.existsSync(rawDir)) return;
+
+  const { parseSession } = require('../lib/suunto-parser');
+  const files = fs.readdirSync(rawDir).filter(f => f.endsWith('.json'));
+
+  for (const filename of files) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(path.join(rawDir, filename), 'utf8'));
+      const { session, laps } = parseSession(raw, filename);
+      if (!laps || !laps.length) continue;
+      const row = db.prepare(
+        'SELECT id FROM sessions WHERE date = ? AND distance_km = ? AND duration_s = ?'
+      ).get(session.date, session.distance_km, session.duration_s);
+      if (row) lapsStore.setLaps(row.id, laps);
+    } catch (_) {}
   }
 }
 

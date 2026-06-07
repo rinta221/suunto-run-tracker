@@ -1,5 +1,33 @@
 # 作業ログ
 
+## 2026-06-07 — Suunto生JSONパーサー実装・6/7データ取り込みリハーサル（設計書15章）
+
+### 実装ファイル
+- `server/lib/suunto-parser.js` — 純粋関数パーサー（生JSON1件 → { session, laps }）
+- `server/routes/import.js` — インポートルート（POST /api/import/suunto）
+- `server/index.js` — `/api/import` ルート登録
+- `server/db/seed.js` — 再起動時に data/suunto_raw/ からラップを再ロードする処理を追加
+
+### 変換ロジック（検証済み）
+- 取得元：HR/Cadence/Speed → Activity Window、GCT/VO/GCB → Header
+- cadence_avg_spm / stride_length_cm → Activity Window の Avg から算出
+- cadence_max_spm → Activity Window の Cadence.Max × 60 × 2
+- 歩幅 → Speed / (Cadence × 2)（JSONのStrideフィールドは不正確のため不使用）
+- pace → Math.round(durS / distKm)
+
+### 投入結果（期待値との突き合わせ）
+| セッション | dist | dur | pace | hr | cadAvg | cadMax | stride | gct | vo | gcb | elev | kcal | vo2max | laps |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| WU（warmup） | 1.73 | 771 | 446 | 132 | 162 | 192 | 95.5 | 265.4 | 9.3 | 51.3 | 7.2 | 79 | 52.0 | 2 |
+| メイン（main） | 3.34 | 1198 | 359 | 142 | 162 | 166 | 103.3 | 265.6 | 9.3 | 50.6 | null* | 163 | 52.2 | 4 |
+| CD（cooldown） | 1.76 | 686 | 390 | 141 | 164 | 194 | 94.6 | 257.0 | 9.0 | 51.0 | 26.0 | 89 | null | 2 |
+
+*メインの elevation_m: Header.Ascent=null のため null（仕様書の "0" は誤記）。全値が期待値と一致。
+
+### UIエンドポイント（温存）
+- `POST /api/import/suunto/preview` — D&D UIで利用予定（将来実装）
+- `POST /api/import/suunto/commit` — 承認後投入（将来実装）
+
 ## 2026-06-07 — 詳細パネルのシューズ欄をフリーテキスト化
 
 - `<select>` → `<input type="text">` に変更
