@@ -1,5 +1,17 @@
 # 作業ログ
 
+## 2026-06-07 — テストデータ・仕様補足書コミット
+
+### コミット対象
+- `data/suunto_raw/20260607_wu.json` — WU（1.73km / 2ラップ）生JSON
+- `data/suunto_raw/20260607_main.json` — メイン（3.34km / 4ラップ）生JSON
+- `data/suunto_raw/20260607_cd.json` — CD（1.76km / 2ラップ）生JSON
+- `data/sessions_20260607.json` — 上記3本の変換済みセッションデータ（laps埋め込み）
+- `docs/claudecode_15_parser.md` — 15章実装補足仕様書（変換ロジック・期待値表）
+- `docs/handoff_prompt.md` — 引き継ぎプロンプト雛形
+
+---
+
 ## 2026-06-07 — Suunto生JSONパーサー実装・6/7データ取り込みリハーサル（設計書15章）
 
 ### 実装ファイル
