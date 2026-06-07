@@ -73,7 +73,7 @@ Suuntoはスマートフォンアプリのみ対応しており、PC・タブレ
 | C | menu | 練習メニュー | 手動 | サジェスト補完あり（過去履歴から） |
 | D | メモ | 練習内容 | 手動 | フォーム意識・練習詳細。マルチライン対応 |
 | E | locate | 場所 | 手動 | サジェスト補完あり（過去履歴から） |
-| F | shoes | シューズ | 手動 | プルダウン（登録済みシューズから選択） |
+| F | shoes | シューズ | 手動 | **暫定：フリーテキスト入力**（将来は正規化してプルダウン化）。既存データに長文メモ・表記揺れ・「A or B」等が混在するため当面は自由入力で保持 |
 | G | Distance | 距離（km） | Suunto自動 | runningのみ |
 | H | Duration | タイム | Suunto自動 | HH:MM:SS |
 | I | Pace | ペース | Suunto自動 | MM:SS/km |
@@ -423,7 +423,7 @@ AI評価には2つの入力経路がある：①APIボタン経由（自動）�
 
 - APIキー設定：Anthropic / OpenAI（マスク表示・接続テストボタン）
 - Suunto連携：OAuthフロー開始・連携状態表示・最終同期日時（Phase 3）
-- シューズ管理：登録・編集・累積距離確認
+- シューズ管理：登録・編集・累積距離確認（※下記「シューズ欄の段階的設計」参照）
 - フェーズ管理：フェーズの作成・編集・削除（名前・開始日・終了日・色・メモ）
 - AIプロンプト：Claude用・GPT用のシステムプロンプトをテキストエリアで編集
 - 列表示設定：バイオメカニクス列のON/OFFをトグルで設定
@@ -487,7 +487,36 @@ AI評価には2つの入力経路がある：①APIボタン経由（自動）�
 | 既存スプレッドシートデータの移行 | Phase 1完成後 | 既存データをCSVインポート vs 新規スタート | 初期データ投入作業 |
 | 実行環境の確定 | Phase 3前 | ローカル専用のまま vs Vercel + Supabaseへ移行 | DB設計・デプロイ構成 |
 | L列（CS）の正式名称確認 | Phase 3前 | Suunto APIドキュメントで正式フィールド名を確認 | スキーママッピング |
+| シューズ欄の正規化 | Phase 2〜3 | 下記「シューズ欄の段階的設計」参照 | shoes列・shoesテーブル・詳細パネルUI |
 | 長距離時のLapデータ送信量 | Phase 2前 | 全ラップ確定。将来的に5kmサマリーオプション追加を検討 | APIコスト |
+
+### 9.1 シューズ欄の段階的設計
+
+**背景：**
+既存スプレッドシートのshoes欄は単なるシューズ名ではなく、運用メモが混在している：
+- 長文メモ（例：「Boston13 # 適正テスト - スロージョグ〜ビルドアップ...」）
+- 表記揺れ（SuperBlast2 / Superblast2 / SB2）
+- 複数候補（「WR28 or Pegasus41」）
+- 状態違い（「インソールを替えたSuperblast2」）
+
+これらをプルダウンで縛ると既存の記録が表示できなくなる。
+
+**段階的設計：**
+
+| 段階 | shoes欄の扱い | 詳細パネルUI |
+|------|-------------|------------|
+| **現状（暫定）** | フリーテキスト | テキスト入力（値をそのまま表示・編集） |
+| **将来（正規化後）** | 正規化したシューズ名 | ユニーク登録されたシューズのプルダウン |
+
+**正規化の方針（将来）：**
+- shoesテーブルにユニークなシューズを登録（SuperBlast2 / Novablast5 / WR28 等）
+- 既存の長文・表記揺れデータを正規化（メモ部分は別カラムへ分離 or memoへ移動）
+- 詳細パネルは「登録済みシューズのプルダウン」＋「新規追加」併用
+- 正規化のタイミングはPhase 2〜3（シューズ別累積距離機能を作る段階）
+
+**現状の実装：**
+- 詳細パネルのシューズ欄はプルダウンを廃止し、フリーテキスト入力にする
+- shoesの値をそのまま表示・編集・保存（表記揺れ・長文もそのまま保持）
 
 ---
 
@@ -924,3 +953,103 @@ date + 近似distance（±10%程度の許容）でマッチング
 | 補正プレビューUI（差分表示・承認） | 中 | 上書き前に確認 |
 | 上書き処理（手動列を保護） | 中 | menu/memo/感想等は保持 |
 | マッチング保留・警告ハンドリング | 低 | 記入ミス検出 |
+
+---
+
+## 15. Suunto生JSON取り込みフロー（Phase 3準備・パーサー資産化）
+
+### 設計思想
+
+将来のSuunto API自動取り込みを見据え、**Suunto生JSONのパーサーをサーバーに内蔵**する。
+手動エクスポートしたJSONも、将来APIから来るJSONも構造は同一のため、変換ロジックを一度作れば入口を差し替えるだけで再利用できる。
+
+```
+入口（差し替え可能）              共通処理（不変・資産）
+手動アップロード ─┐
+                  ├─→ [Suunto JSONパーサー] → [プレビュー] → [DB投入]
+Suunto API（将来）┘         ↑ここを作り込めばAPI連携でそのまま使える
+```
+
+- **入力**：Suunto生JSON（現状は手動D&Dアップロード、将来はAPI取得に差し替え）
+- **変換**：サーバー内蔵パーサー（server/lib/suunto-parser.js 想定）
+- **変換ロジックは将来のAPI連携でも一切変えずに再利用**
+
+### パーサー仕様（検証済み・100kmウルトラ＋6/7データでRunalyze一致確認）
+
+**入力構造：** `DeviceLog.Header`（セッションサマリー）＋ `DeviceLog.Windows[]`（各種ウィンドウ）
+
+**ラップ抽出元：**
+- `Windows[].Window.Type == 'Autolap'` のみがラップ（1kmごと＋端数）
+- `Type == 'Activity'` / `'Move'` はセッション全体サマリー（ラップではない、除外）
+- `Lap` イベント（Start/Stop）はラップとは別物。混同しない
+
+**セッションサマリーの変換（Headerから取得）：**
+
+| Headerフィールド | 変換 | DBフィールド |
+|---|---|---|
+| DateTime | 先頭10文字（JST日付そのまま） | date |
+| Distance | ÷1000 | distance_km |
+| Duration | 整数秒 | duration_s |
+| Ascent | m | elevation_m |
+| Energy | ÷4184 | energy_kcal |
+| MAXVO2 | 小数1桁 | vo2max（nullあり=正常） |
+| EPOC | そのまま | trimp |
+| GroundContactTime.Avg | ×1000 | ground_contact_ms |
+| LeftGroundContactBalance.Avg | %そのまま | gcb_left_pct |
+| VerticalOscillation.Avg | ×100 | vertical_oscillation_cm |
+| pace | duration_s ÷ distance_km | pace_per_km_s |
+
+- セッション平均の cadence_avg_spm / stride_length_cm は**全ラップの平均から算出**（Header.Strideは両足ストライドで定義が異なるため使わない）
+
+**ラップの変換（Autolapウィンドウから）：**
+
+| 取得元 | 変換 | フィールド |
+|---|---|---|
+| Distance | ÷1000 | distance_km |
+| Duration | 整数秒 | lap_duration_s |
+| HR[0].Avg / .Max | ×60 | avg_hr_bpm / max_hr_bpm |
+| Power[0].Avg | そのまま | power_w |
+| Cadence[0].Avg | ×60×2 | cadence_spm |
+| GroundContactTime[0].Avg | ×1000 | ground_contact_ms |
+| VerticalOscillation[0].Avg | ×100 | vertical_oscillation_cm |
+| LeftGroundContactBalance[0].Avg | %そのまま | gcb_left_pct |
+| **Speed[0].Avg ÷ (Cadence×2)** | 歩幅算出 | stride_length_m |
+| Ascent / Descent | 整数 | ascent_m / descent_m |
+| pace | Duration ÷ (Distance/1000) | pace_s |
+
+※ JSONの Stride フィールドは不正確なため使わず、Speed÷(Cadence×2) で算出する
+
+**session_type の決定：**
+- 取り込み時、1ファイル=1セッション。session_typeは手動指定 or ファイル名等から推定（warmup/main/cooldown）
+- 自動推定が困難な場合はNULLで投入し、後からUIで設定
+
+### 取り込みUIフロー
+
+1. 「取り込み」画面でSuunto生JSONをドラッグ&ドロップ（複数同時可）
+2. サーバーがパースして変換
+3. **プレビュー表示**：変換結果（距離・ペース・ラップ数・バイオメカ）を一覧
+4. **重複チェック**：date + distance_km + duration_s で既存と照合、重複は警告
+5. session_type を各セッションに割り当て（WU/メイン/CD、同日複数時）
+6. 承認 → DB投入
+
+### 重複・冪等性
+
+- キー：date + distance_km + duration_s（同一なら重複とみなしスキップ or 警告）
+- 同日複数セッション（WU/メイン/CD）は距離・時刻が異なるため別レコードとして共存
+
+### Lapデータの扱い
+
+- 設計方針通り、ラップはDBに保存しない（AI評価時にその場で参照）
+- 取り込み時、元の生JSONを `data/suunto_raw/` 等に保管しておき、AI評価時に再パースしてラップ取得
+- 保管命名：suunto_workout_id（元ファイル名 or API的ID）で一意管理
+
+### 実装タスク（Phase 3準備）
+
+| タスク | 優先度 | 備考 |
+|-------|-------|------|
+| server/lib/suunto-parser.js（生JSON→DBスキーマ変換） | 高 | 上記仕様。将来API連携で再利用 |
+| POST /api/import/suunto（生JSONアップロード→パース→プレビュー返却） | 高 | 複数ファイル対応 |
+| 取り込みUI（D&D・プレビュー・重複警告・session_type割当・承認） | 高 | |
+| 元生JSONの保管（data/suunto_raw/） | 中 | AI評価時のラップ再取得用 |
+| DB投入処理（承認後・重複スキップ） | 高 | date+distance+durationで冪等性 |
+| 将来：入口をSuunto APIに差し替え | 低 | パーサーは変更不要 |
