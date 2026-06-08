@@ -1443,6 +1443,265 @@ function initEvents() {
       hideAutocomplete();
     }
   });
+
+  // Import Suunto
+  document.getElementById('btn-import-suunto').addEventListener('click', openImportModal);
+  document.getElementById('btn-close-import').addEventListener('click', closeImportModal);
+  document.getElementById('import-suunto-modal').addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop')) closeImportModal();
+  });
+  const importDropzone = document.getElementById('import-dropzone');
+  importDropzone.addEventListener('click', (e) => {
+    if (!e.target.closest('.import-file-label')) {
+      document.getElementById('import-file-input').click();
+    }
+  });
+  importDropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    importDropzone.classList.add('drag-over');
+  });
+  importDropzone.addEventListener('dragleave', () => importDropzone.classList.remove('drag-over'));
+  importDropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    importDropzone.classList.remove('drag-over');
+    handleImportFiles(e.dataTransfer.files);
+  });
+  document.getElementById('import-file-input').addEventListener('change', (e) => {
+    handleImportFiles(e.target.files);
+    e.target.value = '';
+  });
+  document.getElementById('btn-import-reset').addEventListener('click', () => {
+    importState.items = [];
+    renderImportUI();
+  });
+  document.getElementById('btn-import-commit').addEventListener('click', commitImport);
+}
+
+/* ===== Import Suunto ===== */
+const importState = { items: [] };
+
+function openImportModal() {
+  importState.items = [];
+  renderImportUI();
+  document.getElementById('import-suunto-modal').style.display = 'block';
+}
+
+function closeImportModal() {
+  document.getElementById('import-suunto-modal').style.display = 'none';
+  importState.items = [];
+}
+
+function renderImportUI() {
+  const dropzone = document.getElementById('import-dropzone');
+  const previewArea = document.getElementById('import-preview-area');
+  const actions = document.getElementById('import-actions');
+  if (importState.items.length === 0) {
+    dropzone.style.display = 'block';
+    previewArea.innerHTML = '';
+    actions.style.display = 'none';
+  } else {
+    dropzone.style.display = 'none';
+    previewArea.innerHTML = importState.items.map((item, i) => buildImportPreviewCard(item, i)).join('');
+    actions.style.display = 'flex';
+    importState.items.forEach((_, i) => bindImportCardEvents(i));
+  }
+}
+
+async function handleImportFiles(fileList) {
+  const files = [...fileList].filter(f => f.name.endsWith('.json'));
+  if (!files.length) { toast('JSONファイルを選択してください', 'error'); return; }
+  toast(`${files.length} ファイルを解析中...`);
+
+  const payload = [];
+  for (const file of files) {
+    let content;
+    try { content = JSON.parse(await file.text()); }
+    catch(e) { toast(`${file.name}: JSONパースエラー`, 'error'); continue; }
+    payload.push({ filename: file.name, content });
+  }
+  if (!payload.length) return;
+
+  let results;
+  try {
+    results = await api.post('/api/import/suunto/preview', { files: payload });
+  } catch(e) { toast('プレビューエラー: ' + e.message, 'error'); return; }
+
+  importState.items = results.map((r, i) => ({
+    ...r,
+    content: payload[i]?.content,
+    edits: {
+      session_type: r.session?.session_type || 'main',
+      menu: '', memo: '', locate: '', shoes: '', impression: '',
+    },
+  }));
+  renderImportUI();
+}
+
+function buildImportPreviewCard(item, idx) {
+  if (item.error) {
+    return `<div class="import-preview-card">
+      <div class="import-card-header">
+        <span class="import-card-filename">${escHtml(item.filename)}</span>
+        <span style="color:var(--red)">エラー: ${escHtml(item.error)}</span>
+      </div>
+    </div>`;
+  }
+  const s = item.session;
+  const laps = item.laps || [];
+  const distKm  = s.distance_km  != null ? s.distance_km.toFixed(2) + ' km' : '-';
+  const pace    = s.pace_per_km_s ? fmtPace(s.pace_per_km_s) + '/km' : '-';
+  const dur     = s.duration_s   ? fmtDuration(s.duration_s) : '-';
+  const hr      = s.avg_hr_pct   != null ? Math.round(s.avg_hr_pct) + ' bpm' : '-';
+  const elev    = s.elevation_m  != null ? '+' + Math.round(s.elevation_m) + 'm' : '-';
+
+  const dupBanner = item.duplicate
+    ? `<div class="import-warning">⚠ 同一の日付・距離・タイムのセッションが既に存在します（重複の可能性）</div>`
+    : '';
+
+  const bio = [
+    ['ケイデンス', s.cadence_avg_spm != null ? s.cadence_avg_spm + ' spm' : '-'],
+    ['歩幅',       s.stride_length_cm != null ? (s.stride_length_cm / 100).toFixed(2) + ' m' : '-'],
+    ['GCT',        s.ground_contact_ms != null ? Math.round(s.ground_contact_ms) + ' ms' : '-'],
+    ['VO',         s.vertical_oscillation_cm != null ? s.vertical_oscillation_cm.toFixed(1) + ' cm' : '-'],
+    ['GCB左',      s.gcb_left_pct != null ? s.gcb_left_pct.toFixed(1) + '%' : '-'],
+    ['VO2max',     s.vo2max != null ? s.vo2max : '-'],
+    ['kcal',       s.energy_kcal != null ? Math.round(s.energy_kcal) : '-'],
+    ['TRIMP',      s.trimp != null ? Math.round(s.trimp) : '-'],
+  ].map(([l, v]) => `<div class="import-bio-item"><span class="val">${escHtml(String(v))}</span>${escHtml(l)}</div>`).join('');
+
+  const lapRows = laps.map(l => `<tr>
+    <td>${l.lap_number}</td>
+    <td>${l.distance_km != null ? l.distance_km.toFixed(2) : '-'}</td>
+    <td>${l.pace_s ? fmtPace(l.pace_s) + '/km' : '-'}</td>
+    <td>${l.avg_hr_bpm != null ? l.avg_hr_bpm : '-'}</td>
+    <td>${l.cadence_spm != null ? l.cadence_spm : '-'}</td>
+    <td>${l.ground_contact_ms != null ? Math.round(l.ground_contact_ms) : '-'}</td>
+    <td>${l.vertical_oscillation_cm != null ? l.vertical_oscillation_cm.toFixed(1) : '-'}</td>
+    <td>${l.stride_length_m != null ? l.stride_length_m.toFixed(3) : '-'}</td>
+  </tr>`).join('');
+
+  const shoeOptions = S.shoes.map(sh =>
+    `<option value="${escAttr(sh.name)}">${escHtml(sh.name)}</option>`
+  ).join('');
+
+  const st = item.edits.session_type;
+  const radioFor = (v, label) =>
+    `<label><input type="radio" name="st_${idx}" value="${v}" ${st === v ? 'checked' : ''}> ${label}</label>`;
+
+  return `<div class="import-preview-card${item.duplicate ? ' is-duplicate' : ''}" data-idx="${idx}">
+    <div class="import-card-header">
+      <span class="import-card-filename">${escHtml(item.filename)}</span>
+      <div class="import-card-stats">
+        <div class="import-stat"><span class="import-stat-val">${escHtml(s.date)}</span>日付</div>
+        <div class="import-stat"><span class="import-stat-val">${escHtml(distKm)}</span>距離</div>
+        <div class="import-stat"><span class="import-stat-val">${escHtml(dur)}</span>タイム</div>
+        <div class="import-stat"><span class="import-stat-val">${escHtml(pace)}</span>ペース</div>
+        <div class="import-stat"><span class="import-stat-val">${escHtml(hr)}</span>HR</div>
+        <div class="import-stat"><span class="import-stat-val">${escHtml(elev)}</span>標高差</div>
+        <div class="import-stat"><span class="import-stat-val">${laps.length}</span>ラップ</div>
+      </div>
+    </div>
+    ${dupBanner}
+    <div class="import-card-body">
+      <div class="import-bio">${bio}</div>
+      ${laps.length ? `<div class="import-lap-table-wrap">
+        <table class="import-lap-table">
+          <thead><tr>
+            <th>#</th><th>km</th><th>ペース</th><th>HR</th><th>Cad</th><th>GCT</th><th>VO</th><th>歩幅</th>
+          </tr></thead>
+          <tbody>${lapRows}</tbody>
+        </table>
+      </div>` : ''}
+      <div class="import-form">
+        <div class="form-group full-width">
+          <label>セッション種別</label>
+          <div class="import-session-type">
+            ${radioFor('warmup', 'ウォームアップ')}
+            ${radioFor('main', 'メイン')}
+            ${radioFor('cooldown', 'クールダウン')}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>練習メニュー</label>
+          <input type="text" data-field="menu" data-idx="${idx}" value="${escAttr(item.edits.menu)}" placeholder="例：Eペース">
+        </div>
+        <div class="form-group">
+          <label>場所</label>
+          <input type="text" data-field="locate" data-idx="${idx}" value="${escAttr(item.edits.locate)}" placeholder="例：皇居">
+        </div>
+        <div class="form-group">
+          <label>シューズ</label>
+          <select data-field="shoes" data-idx="${idx}">
+            <option value="">— 未設定 —</option>
+            ${shoeOptions}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>メモ</label>
+          <textarea data-field="memo" data-idx="${idx}" placeholder="メモ...">${escHtml(item.edits.memo)}</textarea>
+        </div>
+        <div class="form-group">
+          <label>感想</label>
+          <textarea data-field="impression" data-idx="${idx}" placeholder="感想...">${escHtml(item.edits.impression)}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindImportCardEvents(idx) {
+  const area = document.getElementById('import-preview-area');
+  area.querySelectorAll(`input[name="st_${idx}"]`).forEach(r => {
+    r.addEventListener('change', () => {
+      if (r.checked) importState.items[idx].edits.session_type = r.value;
+    });
+  });
+  area.querySelectorAll(`[data-idx="${idx}"][data-field]`).forEach(el => {
+    const update = () => { importState.items[idx].edits[el.dataset.field] = el.value; };
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+  });
+}
+
+async function commitImport() {
+  const valid = importState.items.filter(item => item.session && !item.error);
+  if (!valid.length) return;
+
+  const btn = document.getElementById('btn-import-commit');
+  btn.disabled = true;
+  btn.textContent = '取り込み中...';
+
+  try {
+    const sessions = valid.map(item => ({
+      filename: item.filename,
+      session: { ...item.session, ...item.edits },
+      laps: item.laps,
+      content: item.content,
+    }));
+
+    const result = await api.post('/api/import/suunto/commit', { sessions });
+    const inserted = result.results.filter(r => r.status === 'inserted').length;
+    const skipped  = result.results.filter(r => r.status === 'skipped').length;
+
+    closeImportModal();
+
+    S.months = await api.get('/api/sessions/months');
+    if (inserted > 0) {
+      const first = result.results.find(r => r.status === 'inserted');
+      if (first?.session?.date) {
+        const ym = first.session.date.slice(0, 7);
+        if (S.months.includes(ym)) S.currentMonth = ym;
+      }
+      await loadSessions();
+      renderTable();
+      renderMonthNav();
+    }
+    toast(`${inserted} 件取り込み完了${skipped ? `（${skipped} 件スキップ）` : ''}`, 'success');
+  } catch(e) {
+    toast('取り込みエラー: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '承認して取り込む';
+  }
 }
 
 /* ===== Boot ===== */

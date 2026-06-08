@@ -179,6 +179,33 @@
     </div>
   </div>
 
+  <!-- Import Suunto Modal -->
+  <div id="import-suunto-modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box modal-import">
+      <div class="modal-header">
+        <h2>Suunto 生JSON取り込み</h2>
+        <button id="btn-close-import">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="import-dropzone" class="import-dropzone">
+          <div class="import-dropzone-inner">
+            <div class="import-dropzone-icon">📂</div>
+            <p>JSONファイルをここにドロップ</p>
+            <p class="import-dropzone-sub">または</p>
+            <label class="btn btn-ghost btn-sm import-file-label" for="import-file-input">ファイルを選択</label>
+            <input type="file" id="import-file-input" accept=".json" multiple style="display:none">
+          </div>
+        </div>
+        <div id="import-preview-area"></div>
+        <div id="import-actions" style="display:none">
+          <button class="btn btn-ghost" id="btn-import-reset">やり直す</button>
+          <button class="btn btn-primary" id="btn-import-commit">承認して取り込む</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Autocomplete dropdown -->
   <div id="autocomplete-list" style="display:none"></div>
 

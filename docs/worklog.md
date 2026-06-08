@@ -1,5 +1,26 @@
 # 作業ログ
 
+## 2026-06-08 — Suunto生JSON取り込みUI実装（設計書15章）
+
+### 実装ファイル
+- `server/index.js` — JSONボディ上限を20MBに拡大（Suunto生JSONのサイズ対応）
+- `public/index.html` — 取り込みモーダルHTML追加（D&Dドロップゾーン・プレビューエリア・フォーム）
+- `public/css/style.css` — 取り込みモーダル用スタイル追加
+- `public/js/app.js` — 取り込みUI全ロジック実装
+
+### 機能
+- ヘッダーの「↑ 取り込み」ボタンからモーダルを開く
+- JSONファイルをD&Dまたはファイル選択でアップロード（複数同時可）
+- `/api/import/suunto/preview` でパース・重複チェック結果をプレビュー表示
+- プレビューカード：日付・距離・タイム・ペース・HR・ラップ数・バイオメカ・ラップ明細テーブル
+- 重複警告バナー（date+distance_km+duration_s で既存と照合）
+- session_type 選択（ウォームアップ/メイン/クールダウン、ファイル名から自動推定済み）
+- menu / memo / locate / shoes / impression の任意入力
+- 「承認して取り込む」→ `/api/import/suunto/commit` でDB投入・生JSONを data/suunto_raw/ に保管
+- 取り込み完了後、該当月に自動ジャンプしてテーブルを再描画
+
+---
+
 ## 2026-06-07 — テストデータ・仕様補足書コミット
 
 ### コミット対象

@@ -654,3 +654,113 @@ td .delete-btn:hover { color: var(--red); }
 .menu-planned { font-size: 11px; color: var(--text-muted); }
 .menu-actual  { font-size: 12px; color: var(--text); }
 .menu-actual-diff { color: #f97316; font-weight: 600; }
+
+/* ===== Import Suunto Modal ===== */
+.modal-import { width: min(880px, 95vw); max-height: 90vh; }
+.import-dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  margin-bottom: 4px;
+}
+.import-dropzone:hover, .import-dropzone.drag-over {
+  background: var(--blue-light);
+  border-color: var(--blue);
+}
+.import-dropzone-icon { font-size: 36px; margin-bottom: 10px; }
+.import-dropzone p { color: var(--text-muted); margin: 4px 0; font-size: 13px; }
+.import-dropzone-sub { font-size: 11px; color: var(--text-light); }
+.import-file-label { cursor: pointer; margin-top: 8px; display: inline-block; }
+.import-preview-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.import-preview-card.is-duplicate { border-color: var(--amber); }
+.import-card-header {
+  background: var(--bg);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+.import-card-filename { font-weight: 700; font-size: 13px; min-width: 160px; }
+.import-card-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+.import-stat { display: flex; flex-direction: column; align-items: center; }
+.import-stat-val { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.import-stat { font-size: 10px; color: var(--text-muted); }
+.import-warning {
+  background: var(--amber-light);
+  border-bottom: 1px solid #fed7aa;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.import-card-body { padding: 14px; }
+.import-bio { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.import-bio-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 60px;
+}
+.import-bio-item .val { font-size: 13px; font-weight: 700; color: var(--text); display: block; line-height: 1.2; }
+.import-lap-table-wrap { overflow-x: auto; margin-bottom: 14px; }
+.import-lap-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.import-lap-table th,
+.import-lap-table td {
+  padding: 3px 8px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.import-lap-table th { background: var(--bg); font-weight: 600; color: var(--text-muted); }
+.import-lap-table td:first-child,
+.import-lap-table th:first-child { text-align: center; width: 28px; }
+.import-lap-table tr:last-child td { border-bottom: none; }
+.import-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.import-form .full-width { grid-column: 1 / -1; }
+.import-form .form-group { display: flex; flex-direction: column; gap: 4px; }
+.import-form label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: none; }
+.import-form input,
+.import-form select,
+.import-form textarea {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color .15s;
+}
+.import-form input:focus,
+.import-form select:focus,
+.import-form textarea:focus { outline: none; border-color: var(--blue); }
+.import-form textarea { resize: vertical; min-height: 52px; }
+.import-session-type { display: flex; gap: 14px; flex-wrap: wrap; }
+.import-session-type label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text); font-weight: normal; cursor: pointer;
+}
+#import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0 2px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
