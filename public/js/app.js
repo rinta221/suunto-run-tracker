@@ -15,7 +15,7 @@ const COLUMNS = [
   { id: 'distance_km',             label: 'km',        width: 60,  num: true },
   { id: 'duration_s',              label: 'タイム',    width: 72,  num: true, fmt: 'duration' },
   { id: 'pace_per_km_s',           label: 'ペース',    width: 62,  num: true, fmt: 'pace' },
-  { id: 'avg_hr_pct',              label: 'HR%',       width: 55,  num: true },
+  { id: 'avg_hr_pct',              label: 'HR',        width: 58,  num: true },
   { id: 'elevation_m',             label: '標高',      width: 60,  num: true },
   // CS列（cadence_score）はメインテーブルに表示しない（設計書 3.2節 L列）
   { id: 'energy_kcal',             label: 'kcal',      width: 58,  num: true },
@@ -81,7 +81,7 @@ function formatCell(col, session) {
   if (col.fmt === 'pace') return v ? fmtPace(v) + '/km' : '';
   if (col.num && v != null) {
     if (col.id === 'distance_km') return fmtNum(v) + 'km';
-    if (col.id === 'avg_hr_pct') return typeof v === 'number' ? Math.round(v) + '%' : v;
+    if (col.id === 'avg_hr_pct') return typeof v === 'number' ? Math.round(v) + ' bpm' : v;
     if (col.id === 'elevation_m') return typeof v === 'number' ? Math.round(v) + 'm' : v;
     if (col.id === 'energy_kcal') return typeof v === 'number' ? Math.round(v) + 'kcal' : v;
     if (col.id === 'trimp') return typeof v === 'number' ? Math.round(v) : v;
