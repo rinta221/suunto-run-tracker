@@ -1575,9 +1575,9 @@ function buildImportPreviewCard(item, idx) {
     <td>${l.pace_s ? fmtPace(l.pace_s) + '/km' : '-'}</td>
     <td>${l.avg_hr_bpm != null ? l.avg_hr_bpm : '-'}</td>
     <td>${l.cadence_spm != null ? l.cadence_spm : '-'}</td>
-    <td>${l.ground_contact_ms != null ? Math.round(l.ground_contact_ms) : '-'}</td>
-    <td>${l.vertical_oscillation_cm != null ? l.vertical_oscillation_cm.toFixed(1) : '-'}</td>
-    <td>${l.stride_length_m != null ? l.stride_length_m.toFixed(3) : '-'}</td>
+    <td>${l.ground_contact_ms != null ? Math.round(l.ground_contact_ms) + ' ms' : '-'}</td>
+    <td>${l.vertical_oscillation_cm != null ? l.vertical_oscillation_cm.toFixed(1) + ' cm' : '-'}</td>
+    <td>${l.stride_length_m != null ? l.stride_length_m.toFixed(2) + ' m' : '-'}</td>
   </tr>`).join('');
 
   const shoeOptions = S.shoes.map(sh =>
