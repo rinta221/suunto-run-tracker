@@ -1,5 +1,18 @@
 # 作業ログ
 
+## 2026-06-11 — Phase 1.5: slots/results/evaluationsスキーマ追加
+
+### 変更ファイル
+- `server/db/database.js` — v5設計（docs/suunto_design_v5.md 3.2）の3テーブルを追加
+  - `slots`（トレーニング枠：計画・意図レイヤー）
+  - `results`（実績：計測データレイヤー、suunto_workout_id UNIQUE）
+  - `evaluations`（AI評価：slot紐付け、locked継承）
+  - インデックス：idx_slots_date / idx_results_slot / idx_evals_slot
+- 既存 sessions / phases / reports / shoes は無変更（読み取り専用で維持）
+- 事前保護：`UPDATE sessions SET gpt_eval_locked=1 WHERE gpt_eval非空`（172件ロック確認）
+
+---
+
 ## 2026-06-09 — 取り込みプレビューのラップテーブル単位を統一
 
 ### 変更ファイル

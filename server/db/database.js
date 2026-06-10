@@ -86,6 +86,65 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT
   );
+
+  -- v5: slot/result分離モデル（docs/suunto_design_v5.md 3.2）
+  CREATE TABLE IF NOT EXISTS slots (
+    id           TEXT PRIMARY KEY,
+    date         TEXT NOT NULL,
+    section      TEXT,
+    slot_type    TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'planned',
+    plan_menu    TEXT,
+    plan_notes   TEXT,
+    plan_locate  TEXT,
+    plan_shoes   TEXT,
+    actual_menu  TEXT,
+    memo         TEXT,
+    impression   TEXT,
+    phase_id     TEXT,
+    source       TEXT DEFAULT 'manual',
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS results (
+    id                  TEXT PRIMARY KEY,
+    slot_id             TEXT,
+    suunto_workout_id   TEXT UNIQUE,
+    raw_json_path       TEXT,
+    start_time          TEXT,
+    distance_km         REAL,
+    duration_s          INTEGER,
+    pace_per_km_s       INTEGER,
+    avg_hr_bpm          INTEGER,
+    elevation_m         REAL,
+    energy_kcal         INTEGER,
+    title               TEXT,
+    trimp               REAL,
+    vo2max              REAL,
+    ground_contact_ms   REAL,
+    gcb_left_pct        REAL,
+    vertical_oscillation_cm REAL,
+    cadence_avg_spm     INTEGER,
+    cadence_max_spm     INTEGER,
+    stride_length_cm    REAL,
+    source              TEXT,
+    imported_at         TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS evaluations (
+    id          TEXT PRIMARY KEY,
+    slot_id     TEXT NOT NULL,
+    ai          TEXT NOT NULL,
+    text        TEXT,
+    locked      INTEGER DEFAULT 0,
+    created_at  TEXT,
+    updated_at  TEXT
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_slots_date ON slots(date);
+  CREATE INDEX IF NOT EXISTS idx_results_slot ON results(slot_id);
+  CREATE INDEX IF NOT EXISTS idx_evals_slot ON evaluations(slot_id);
 `);
 
 // Migration: add lock columns (idempotent)
