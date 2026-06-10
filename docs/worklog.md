@@ -1,5 +1,18 @@
 # 作業ログ
 
+## 2026-06-11 — Phase 1.5: 移行スクリプト migrate-v5（全検証パス）
+
+### 変更ファイル
+- `server/scripts/migrate-v5.js` 新規 — sessions → slots/results/evaluations 分解コピー
+  - 再実行可能（新3テーブルDELETE→再投入。sessionsは読むだけ）
+  - HR換算：suunto行はbpm格納（パーサー仕様で確認）→そのまま、スプレッドシート行は %HRmax×200/100
+  - GCB：gcb_left_pct優先。gc_balanceのみの11件は左値レスキューパース（全件成功）
+  - rest行でも距離を持つ3行（1/13・4/1・4/13、計11.1km）はresultを付与（ユーザー確定。Phase 4でunplanned run slotへの正規化を検討）
+- `package.json` — `npm run migrate-v5` 追加
+- 検証結果：slots 284 / results 188 / evaluations 172（gpt locked=1 172）/ 距離合計1007.66一致 / 5/31=2slots / 6/7=wu・main・cd
+
+---
+
 ## 2026-06-11 — Phase 1.5: slots/results/evaluationsスキーマ追加
 
 ### 変更ファイル
