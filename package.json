@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "migrate-v5": "node server/scripts/migrate-v5.js"
+    "migrate-v5": "node server/scripts/migrate-v5.js",
+    "backup": "node server/scripts/backup.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",

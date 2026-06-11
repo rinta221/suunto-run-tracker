@@ -148,3 +148,6 @@ vite.config.ts.timestamp-*
 data/*.db
 data/*.db-shm
 data/*.db-wal
+
+# Manual-input backup dumps (npm run backup)
+data/backup/
