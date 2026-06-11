@@ -196,6 +196,10 @@ function buildDisplayRows(sessions) {
     rows.push({ kind: 'session', session: s });
     for (const p of phasesEndingThisMonth) {
       if (p.end_date === s.date && s.phase_id === p.id) {
+        // 同日に同フェーズの行が複数ある場合（WU/M/CDや同日2セッション）は
+        // 最後の行の後にだけ挿入する（バー重複・同日グルーピング分断の防止）
+        const lastMatch = sessions.filter(x => x.date === p.end_date && x.phase_id === p.id).pop();
+        if (s !== lastMatch) continue;
         const phaseSessions = S.sessions.filter(ps => ps.phase_id === p.id && ps.activity_type === 'running');
         const totalDist = phaseSessions.reduce((acc, ps) => acc + (ps.distance_km || 0), 0);
         const totalTrimp = phaseSessions.reduce((acc, ps) => acc + (ps.trimp || 0), 0);

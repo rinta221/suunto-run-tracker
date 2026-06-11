@@ -1,5 +1,30 @@
 # 作業ログ
 
+## 2026-06-11 — Phase 1.5後処理: バックアップ小物・フェーズまとめバー重複修正
+
+### npm run backup（手動入力分の定期バックアップ）
+- `server/scripts/backup.js` 新規 — DBにしか無いデータ（slots/evaluations/phases/reports/shoes）を
+  `data/backup/backup_YYYYMMDD_HHMMSS.json` に1ファイルダンプ（meta=実行時刻・件数、30世代自動削除）
+- results は生JSONから再構築可能なため対象外。リストアはYAGNI（手動手順をスクリプト冒頭コメントに記載）
+- `.gitignore` に data/backup/ 追加。初回実行：slots 284 / evaluations 172 / phases 4 / reports 0 / shoes 0
+
+### 5/31フェーズまとめバー重複の修正（public/js/app.js）
+- 原因：`buildDisplayRows()` がフェーズ終了日（5/31）に一致する**各セッション行の後ろ**にまとめバーを
+  挿入していたため、同日2行で2回描画。間に挟まったバーが prevDate をリセットし同日グルーピングも分断
+- **移行前から存在するバグ**（切替コミット混入ではない）：切替前コミット(b80e733)をworktree+DBスナップショット
+  で起動し同一データで比較 → 移行前も2回描画されることを確認。5/31両行の phase_id は新旧とも同一値で
+  データ由来ではない
+- 修正：同日同フェーズの最後の行の後にだけバーを挿入（3行）。5月=バー1回・同日グルーピング復活、
+  6月の現行フェーズまとめ（end_dateなし経路）も正常を確認
+- 副次確認：移行前後の「24回 vs 25回」差は5/30「移動日」（旧activity_type=manual・距離なし）が
+  running 扱いになる既知差分。距離合計は同一（244.6km）
+
+### 監視プロセスの正体
+- localhost:3000 の自動再起動は **nodemon**（`node_modules/.bin/nodemon server/index.js`、
+  ユーザーのターミナルセッションで起動中）によるもの。設定変更なし
+
+---
+
 ## 2026-06-11 — Phase 1.5: API/フロント切替（sessions → slots LEFT JOIN results）
 
 ### 変更ファイル
