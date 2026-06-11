@@ -6,18 +6,9 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db/database');
 const lapsStore = require('../laps-store');
 const { parseSession } = require('../lib/suunto-parser');
+const { getSession, SESSION_TYPE_TO_SECTION } = require('../db/slot-view');
 
 const RAW_DIR = path.join(__dirname, '../../data/suunto_raw');
-
-const DB_COLS = [
-  'id','activity_type','source','session_type','suunto_workout_id','phase_id','date',
-  'planned_menu','menu','memo','locate','shoes','distance_km','duration_s','pace_per_km_s',
-  'avg_hr_pct','elevation_m','cadence_score','energy_kcal','title','trimp','vo2max',
-  'ground_contact_ms','gcb_left_pct','vertical_oscillation_cm','cadence_max_spm',
-  'cadence_avg_spm','stride_length_cm','gc_balance','impression',
-  'claude_eval','claude_eval_at','claude_eval_locked','gpt_eval','gpt_eval_at','gpt_eval_locked',
-  'created_at','updated_at',
-];
 
 function getPhaseId(date) {
   const p = db.prepare(
@@ -28,8 +19,46 @@ function getPhaseId(date) {
 
 function isDuplicate(s) {
   return !!db.prepare(
-    'SELECT 1 FROM sessions WHERE date = ? AND distance_km = ? AND duration_s = ?'
+    `SELECT 1 FROM results r JOIN slots sl ON sl.id = r.slot_id
+     WHERE sl.date = ? AND r.distance_km = ? AND r.duration_s = ?`
   ).get(s.date, s.distance_km, s.duration_s);
+}
+
+// Phase 1.5: パーサー出力（旧sessions形状）を slot + result に分解して投入
+// ※ 取り込みは実績ベースのため status='done'（予定外unplanned等の意味論はPhase 2で導入）
+function insertParsed(session, laps, filename, now) {
+  const slotId = uuidv4();
+  const section = SESSION_TYPE_TO_SECTION[session.session_type] ?? null;
+
+  db.prepare(`INSERT INTO slots
+    (id, date, section, slot_type, status, plan_menu, plan_notes, plan_locate, plan_shoes,
+     actual_menu, memo, impression, phase_id, source, created_at, updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(slotId, session.date, section, 'run', 'done',
+      session.menu || null, null, session.locate || null, session.shoes || null,
+      session.menu || null, session.memo || null, null,
+      getPhaseId(session.date), 'manual', now, now);
+
+  db.prepare(`INSERT INTO results
+    (id, slot_id, suunto_workout_id, raw_json_path, start_time, distance_km, duration_s, pace_per_km_s,
+     avg_hr_bpm, elevation_m, energy_kcal, title, trimp, vo2max, ground_contact_ms, gcb_left_pct,
+     vertical_oscillation_cm, cadence_avg_spm, cadence_max_spm, stride_length_cm, source, imported_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(uuidv4(), slotId,
+      session.suunto_workout_id || null,
+      filename ? 'data/suunto_raw/' + filename : null,
+      null,
+      session.distance_km, session.duration_s, session.pace_per_km_s,
+      session.avg_hr_pct != null ? Math.round(session.avg_hr_pct) : null, // パーサーはbpm格納
+      session.elevation_m, session.energy_kcal, session.title, session.trimp, session.vo2max,
+      session.ground_contact_ms, session.gcb_left_pct, session.vertical_oscillation_cm,
+      session.cadence_avg_spm, session.cadence_max_spm, session.stride_length_cm,
+      'suunto_json', now);
+
+  // ラップはDBに保存せずメモリストアへ（slot idをキーにする）
+  if (laps && laps.length) lapsStore.setLaps(slotId, laps);
+
+  return slotId;
 }
 
 // ============================================================
@@ -46,10 +75,6 @@ router.post('/suunto', (req, res) => {
   if (files.length === 0) {
     return res.json({ read: 0, inserted: 0, skipped: 0, results: [] });
   }
-
-  const insertStmt = db.prepare(
-    `INSERT OR IGNORE INTO sessions (${DB_COLS.join(',')}) VALUES (${DB_COLS.map(() => '?').join(',')})`
-  );
 
   const now = new Date().toISOString();
   const results = [];
@@ -77,19 +102,7 @@ router.post('/suunto', (req, res) => {
         continue;
       }
 
-      const id = uuidv4();
-      const row = {
-        ...session,
-        id,
-        phase_id: getPhaseId(session.date),
-        created_at: now,
-        updated_at: now,
-      };
-
-      insertStmt.run(DB_COLS.map(c => row[c] ?? null));
-
-      // ラップはDBに保存せずメモリストアへ（サーバー再起動時は seed.js で再ロード）
-      if (laps && laps.length) lapsStore.setLaps(id, laps);
+      const id = insertParsed(session, laps, filename, now);
 
       results.push({
         filename,
@@ -160,10 +173,6 @@ router.post('/suunto/commit', (req, res) => {
 
   if (!fs.existsSync(RAW_DIR)) fs.mkdirSync(RAW_DIR, { recursive: true });
 
-  const insertStmt = db.prepare(
-    `INSERT OR IGNORE INTO sessions (${DB_COLS.join(',')}) VALUES (${DB_COLS.map(() => '?').join(',')})`
-  );
-
   const now = new Date().toISOString();
   const results = [];
 
@@ -174,20 +183,16 @@ router.post('/suunto/commit', (req, res) => {
         continue;
       }
 
-      const id = uuidv4();
-      const row = { ...session, id, phase_id: getPhaseId(session.date), created_at: now, updated_at: now };
-
-      insertStmt.run(DB_COLS.map(c => row[c] ?? null));
-
-      if (laps && laps.length) lapsStore.setLaps(id, laps);
-
+      // 生JSON＝真実の源：先に原本を保管してからDBへ（v5 3.1）
       if (content && filename) {
         try {
           fs.writeFileSync(path.join(RAW_DIR, filename), JSON.stringify(content), 'utf8');
         } catch (_) {}
       }
 
-      results.push({ filename, status: 'inserted', id, session: row });
+      const id = insertParsed(session, laps, filename, now);
+
+      results.push({ filename, status: 'inserted', id, session: getSession(id) });
     }
   })();
 

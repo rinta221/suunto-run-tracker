@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/database');
+const { listSessions, getSession } = require('../db/slot-view');
 
 const DOW_JP = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -31,19 +31,16 @@ router.get('/tsv', (req, res) => {
 
   let sessions;
   if (scope === 'selected' && ids) {
-    const idList = ids.split(',');
-    sessions = idList
-      .map(id => db.prepare('SELECT * FROM sessions WHERE id = ?').get(id))
-      .filter(Boolean);
+    sessions = ids.split(',').map(id => getSession(id)).filter(Boolean);
   } else if (scope === 'month' && month) {
-    sessions = db.prepare("SELECT * FROM sessions WHERE date LIKE ? ORDER BY date ASC").all(month + '-%');
+    sessions = listSessions(month);
   } else {
-    sessions = db.prepare("SELECT * FROM sessions ORDER BY date ASC").all();
+    sessions = listSessions();
   }
 
   const headers = [
     '日付', '曜日', '練習メニュー', 'メモ(練習内容)', '場所', 'シューズ',
-    'Distance(km)', 'Duration', 'Pace(/km)', 'avg.HR%', 'Elev.(m)', 'CS',
+    'Distance(km)', 'Duration', 'Pace(/km)', 'avg.HR(bpm)', 'Elev.(m)', 'CS',
     'Energy(kcal)', 'Splits', 'Title', 'TRIMP', 'VO2max',
     'Ground contact(ms)', 'GCB(%左)', '上下動(cm)', '最大ケイデンス(spm)', '平均ケイデンス(spm)',
     '平均歩幅(cm)', '左右接地バランス', '感想', 'Claude評価', 'GPT評価',
@@ -91,18 +88,18 @@ router.get('/markdown', (req, res) => {
   const { ids, prompt } = req.query;
   let sessions;
   if (ids) {
-    sessions = ids.split(',').map(id => db.prepare('SELECT * FROM sessions WHERE id = ?').get(id)).filter(Boolean);
+    sessions = ids.split(',').map(id => getSession(id)).filter(Boolean);
   } else {
-    sessions = db.prepare('SELECT * FROM sessions ORDER BY date ASC LIMIT 20').all();
+    sessions = listSessions().slice(0, 20);
   }
 
   const promptText = prompt || '以下のランニングデータを分析して、トレーニングの傾向と改善点を教えてください。';
 
   let md = `${promptText}\n\n`;
-  md += `| 日付 | 曜 | メニュー | 距離 | ペース | HR% | TRIMP | 感想 |\n`;
+  md += `| 日付 | 曜 | メニュー | 距離 | ペース | HR | TRIMP | 感想 |\n`;
   md += `|------|-----|---------|------|--------|------|-------|------|\n`;
   for (const s of sessions) {
-    md += `| ${s.date} | ${dow(s.date)} | ${s.menu || '-'} | ${s.distance_km ? s.distance_km + 'km' : '-'} | ${formatPace(s.pace_per_km_s) || '-'} | ${s.avg_hr_pct ? s.avg_hr_pct + '%' : '-'} | ${s.trimp || '-'} | ${s.impression || '-'} |\n`;
+    md += `| ${s.date} | ${dow(s.date)} | ${s.menu || '-'} | ${s.distance_km ? s.distance_km + 'km' : '-'} | ${formatPace(s.pace_per_km_s) || '-'} | ${s.avg_hr_pct ? s.avg_hr_pct + 'bpm' : '-'} | ${s.trimp || '-'} | ${s.impression || '-'} |\n`;
   }
 
   res.setHeader('Content-Type', 'application/json');

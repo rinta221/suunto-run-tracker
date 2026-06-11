@@ -1,5 +1,33 @@
 # 作業ログ
 
+## 2026-06-11 — Phase 1.5: API/フロント切替（sessions → slots LEFT JOIN results）
+
+### 変更ファイル
+- `server/db/slot-view.js` 新規 — slots/results/evaluations を旧sessions形状JSONへ変換する互換レイヤー（レスポンス形状互換でUI変更ゼロ）
+- `server/routes/sessions.js` — GET/POST/PATCH/DELETE/months/autocomplete を slots ベースに切替
+  - インライン編集の振り分け：menu→actual_menu、locate→plan_locate、shoes→plan_shoes、memo/impression→slots
+  - AI評価系（text/at/locked）は evaluations にUPSERT。数値系は編集対象外（result由来）
+  - DELETE は slot + result + evaluation を連鎖削除
+- `server/routes/ai.js` — 403ロックガード・評価書き込みを evaluations テーブルへ切替
+- `server/routes/import.js` — Suunto取り込みを slot+result 投入に変更（重複チェックは results JOIN slots、raw_json_path保存、ラップはslot idキー）
+- `server/db/seed.js` — ラップ再ロードを raw_json_path → slot_id 基準に変更
+- `server/routes/export.js` — 互換レイヤー経由に切替（HR列ヘッダを bpm に修正）
+- `server/routes/shoes.js` / `server/routes/phases.js` — sessions参照を slots/results に変更
+
+### 検証（ブラウザ localhost:3000 / Playwright）
+- 月ナビ・同日グルーピング（6/7=WU/M/CD 3行）・ドロワー（サマリー/バイオメカ/ラップ4本）・🔒ロック表示 すべて移行前と同一
+- ロック済みGPT評価への再評価 → 403（evaluations.locked参照）
+- rest+距離行（4/1, 4/13）は💤スタイルのまま距離・タイム表示
+- PATCH振り分け・DELETE連鎖・数値系無視・autocomplete・export を一時行でAPIテスト済み
+- sessions テーブルは無傷（284件 / 距離1007.66 / locked 172）
+
+### 表示上の既知の差分（仕様通り）
+- HR列：スプレッドシート行も実bpm値表示（旧は%値をbpmラベルで表示していた）
+- 旧activity_type='manual'の4行は🏃表示（manual→run マッピングによる）
+- GC左右列（gc_balance・既定非表示）はv5廃止につき空欄
+
+---
+
 ## 2026-06-11 — Phase 1.5: 移行スクリプト migrate-v5（全検証パス）
 
 ### 変更ファイル

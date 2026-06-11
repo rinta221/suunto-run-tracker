@@ -25,7 +25,7 @@ router.patch('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  db.prepare('UPDATE sessions SET phase_id = NULL WHERE phase_id = ?').run(req.params.id);
+  db.prepare('UPDATE slots SET phase_id = NULL WHERE phase_id = ?').run(req.params.id);
   db.prepare('DELETE FROM phases WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });

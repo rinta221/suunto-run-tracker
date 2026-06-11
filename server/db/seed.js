@@ -192,7 +192,9 @@ function reloadLapsStore() {
     }
   }
 
-  // 2. data/suunto_raw/ の生JSONからラップを再ロード（date+distance+durationでセッション特定）
+  // 2. data/suunto_raw/ の生JSONからラップを再ロード
+  //    Phase 1.5: ラップの紐付け先は slot id（results.raw_json_path優先、
+  //    無ければ date+distance+duration で result を特定して slot_id を得る）
   const rawDir = path.join(__dirname, '../../data/suunto_raw');
   if (!fs.existsSync(rawDir)) return;
 
@@ -204,10 +206,12 @@ function reloadLapsStore() {
       const raw = JSON.parse(fs.readFileSync(path.join(rawDir, filename), 'utf8'));
       const { session, laps } = parseSession(raw, filename);
       if (!laps || !laps.length) continue;
-      const row = db.prepare(
-        'SELECT id FROM sessions WHERE date = ? AND distance_km = ? AND duration_s = ?'
-      ).get(session.date, session.distance_km, session.duration_s);
-      if (row) lapsStore.setLaps(row.id, laps);
+      const row = db.prepare('SELECT slot_id FROM results WHERE raw_json_path = ?')
+        .get('data/suunto_raw/' + filename)
+        || db.prepare(`SELECT r.slot_id FROM results r JOIN slots sl ON sl.id = r.slot_id
+                       WHERE sl.date = ? AND r.distance_km = ? AND r.duration_s = ?`)
+          .get(session.date, session.distance_km, session.duration_s);
+      if (row && row.slot_id) lapsStore.setLaps(row.slot_id, laps);
     } catch (_) {}
   }
 }

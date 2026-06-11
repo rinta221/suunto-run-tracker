@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
 const db = require('../db/database');
 const lapsStore = require('../laps-store');
 
@@ -17,19 +18,21 @@ const DUMMY_GPT = [
 
 // POST /api/ai/evaluate
 // Body: { sessionId, provider: 'claude' | 'gpt' }
+// Phase 1.5: 評価の読み書き・ロックガードを evaluations テーブルに切替（sessionId = slot id）
 // Attaches lap data from in-memory store (not persisted in DB per design spec)
 router.post('/evaluate', (req, res) => {
   const { sessionId, provider } = req.body;
   if (!sessionId || !provider) return res.status(400).json({ error: 'sessionId and provider required' });
 
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(sessionId);
-  if (!session) return res.status(404).json({ error: 'Session not found' });
+  const slot = db.prepare('SELECT id FROM slots WHERE id = ?').get(sessionId);
+  if (!slot) return res.status(404).json({ error: 'Session not found' });
 
-  if (provider === 'claude' && session.claude_eval_locked) {
-    return res.status(403).json({ error: 'Claude評価はロックされています' });
-  }
-  if (provider === 'gpt' && session.gpt_eval_locked) {
-    return res.status(403).json({ error: 'GPT評価はロックされています' });
+  const ai = provider === 'claude' ? 'claude' : 'gpt';
+  const existing = db.prepare('SELECT id, locked FROM evaluations WHERE slot_id = ? AND ai = ?').get(sessionId, ai);
+  if (existing && existing.locked) {
+    return res.status(403).json({
+      error: provider === 'claude' ? 'Claude評価はロックされています' : 'GPT評価はロックされています',
+    });
   }
 
   const laps = lapsStore.getLaps(sessionId);
@@ -46,13 +49,14 @@ router.post('/evaluate', (req, res) => {
       text += ` （${lapCount}ラップのデータを参照しました）`;
     }
 
-    if (provider === 'claude') {
-      db.prepare('UPDATE sessions SET claude_eval = ?, claude_eval_at = ?, updated_at = ? WHERE id = ?')
-        .run(text, now, now, sessionId);
+    if (existing) {
+      db.prepare('UPDATE evaluations SET text = ?, created_at = ?, updated_at = ? WHERE id = ?')
+        .run(text, now, now, existing.id);
     } else {
-      db.prepare('UPDATE sessions SET gpt_eval = ?, gpt_eval_at = ?, updated_at = ? WHERE id = ?')
-        .run(text, now, now, sessionId);
+      db.prepare('INSERT INTO evaluations (id, slot_id, ai, text, locked, created_at, updated_at) VALUES (?,?,?,?,0,?,?)')
+        .run(uuidv4(), sessionId, ai, text, now, now);
     }
+    db.prepare('UPDATE slots SET updated_at = ? WHERE id = ?').run(now, sessionId);
 
     res.json({ text, evaluatedAt: now, lapCount });
   }, 1500);

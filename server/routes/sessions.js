@@ -3,21 +3,49 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db/database');
 const lapsStore = require('../laps-store');
+const { listSessions, getSession, SESSION_TYPE_TO_SECTION, ACTIVITY_TO_SLOT_TYPE } = require('../db/slot-view');
 
-const EDITABLE_COLS = [
-  'activity_type','date','menu','memo','locate','shoes',
-  'distance_km','duration_s','pace_per_km_s','avg_hr_pct','elevation_m',
-  'cadence_score','energy_kcal','title','trimp','vo2max',
-  'ground_contact_ms','gcb_left_pct','vertical_oscillation_cm',
-  'cadence_max_spm','cadence_avg_spm','stride_length_cm','gc_balance',
-  'impression','claude_eval','claude_eval_at','gpt_eval','gpt_eval_at',
-  'claude_eval_locked','gpt_eval_locked','phase_id',
-];
+// Phase 1.5: 内部実装を slots LEFT JOIN results に切替（レスポンスのJSON形状は旧sessions互換）
+// インライン編集の保存先振り分け（旧キー → slots列）。数値系はresult由来のため編集対象外
+const SLOT_FIELD_MAP = {
+  date: 'date',
+  menu: 'actual_menu',
+  memo: 'memo',
+  locate: 'plan_locate',
+  shoes: 'plan_shoes',
+  impression: 'impression',
+  planned_menu: 'plan_menu',
+  phase_id: 'phase_id',
+};
+
+// AI評価系（旧キー → evaluations列）。ai別にUPSERTする
+const EVAL_FIELD_MAP = {
+  claude_eval: { ai: 'claude', col: 'text' },
+  claude_eval_at: { ai: 'claude', col: 'created_at' },
+  claude_eval_locked: { ai: 'claude', col: 'locked' },
+  gpt_eval: { ai: 'gpt', col: 'text' },
+  gpt_eval_at: { ai: 'gpt', col: 'created_at' },
+  gpt_eval_locked: { ai: 'gpt', col: 'locked' },
+};
+
+function upsertEvalField(slotId, ai, col, value, now) {
+  const existing = db.prepare('SELECT id FROM evaluations WHERE slot_id = ? AND ai = ?').get(slotId, ai);
+  if (existing) {
+    db.prepare(`UPDATE evaluations SET ${col} = ?, updated_at = ? WHERE id = ?`).run(value, now, existing.id);
+  } else {
+    db.prepare('INSERT INTO evaluations (id, slot_id, ai, text, locked, created_at, updated_at) VALUES (?,?,?,?,?,?,?)')
+      .run(uuidv4(), slotId, ai,
+        col === 'text' ? value : null,
+        col === 'locked' ? (value ? 1 : 0) : 0,
+        col === 'created_at' ? value : now,
+        now);
+  }
+}
 
 // GET /api/sessions/months
 router.get('/months', (req, res) => {
   const rows = db.prepare(
-    "SELECT DISTINCT substr(date,1,7) as month FROM sessions ORDER BY month ASC"
+    "SELECT DISTINCT substr(date,1,7) as month FROM slots ORDER BY month ASC"
   ).all();
   res.json(rows.map(r => r.month));
 });
@@ -26,30 +54,19 @@ router.get('/months', (req, res) => {
 router.get('/autocomplete/:field', (req, res) => {
   const { field } = req.params;
   const { q } = req.query;
-  if (!['menu', 'locate', 'shoes'].includes(field)) return res.json([]);
+  const colMap = { menu: 'actual_menu', locate: 'plan_locate', shoes: 'plan_shoes' };
+  const col = colMap[field];
+  if (!col) return res.json([]);
   const stmt = q
-    ? db.prepare(`SELECT DISTINCT ${field} as v FROM sessions WHERE ${field} IS NOT NULL AND ${field} != '' AND ${field} LIKE ? ORDER BY ${field} LIMIT 20`)
-    : db.prepare(`SELECT DISTINCT ${field} as v FROM sessions WHERE ${field} IS NOT NULL AND ${field} != '' ORDER BY ${field} LIMIT 20`);
+    ? db.prepare(`SELECT DISTINCT ${col} as v FROM slots WHERE ${col} IS NOT NULL AND ${col} != '' AND ${col} LIKE ? ORDER BY ${col} LIMIT 20`)
+    : db.prepare(`SELECT DISTINCT ${col} as v FROM slots WHERE ${col} IS NOT NULL AND ${col} != '' ORDER BY ${col} LIMIT 20`);
   const rows = q ? stmt.all('%' + q + '%') : stmt.all();
   res.json(rows.map(r => r.v));
 });
 
 // GET /api/sessions?month=YYYY-MM
 router.get('/', (req, res) => {
-  const { month } = req.query;
-  const stmt = month
-    ? db.prepare(`
-        SELECT s.*, p.name as phase_name, p.color as phase_color
-        FROM sessions s LEFT JOIN phases p ON s.phase_id = p.id
-        WHERE s.date LIKE ? ORDER BY s.date ASC, s.created_at ASC
-      `)
-    : db.prepare(`
-        SELECT s.*, p.name as phase_name, p.color as phase_color
-        FROM sessions s LEFT JOIN phases p ON s.phase_id = p.id
-        ORDER BY s.date ASC, s.created_at ASC
-      `);
-  const sessions = month ? stmt.all(month + '-%') : stmt.all();
-  res.json(sessions);
+  res.json(listSessions(req.query.month));
 });
 
 // POST /api/sessions
@@ -62,69 +79,57 @@ router.post('/', (req, res) => {
     "SELECT id FROM phases WHERE start_date <= ? AND (end_date IS NULL OR end_date >= ?) ORDER BY start_date DESC LIMIT 1"
   ).get(date, date);
 
-  const s = {
-    id,
-    activity_type: req.body.activity_type || 'running',
-    suunto_workout_id: null,
-    phase_id: phase ? phase.id : null,
-    date,
-    menu: req.body.menu || null,
-    memo: req.body.memo || null,
-    locate: req.body.locate || null,
-    shoes: req.body.shoes || null,
-    distance_km: req.body.distance_km || null,
-    duration_s: req.body.duration_s || null,
-    pace_per_km_s: null,
-    avg_hr_pct: null,
-    elevation_m: null,
-    cadence_score: null,
-    energy_kcal: null,
-    title: null,
-    trimp: null,
-    vo2max: null,
-    ground_contact_ms: null,
-    gcb_left_pct: null,
-    vertical_oscillation_cm: null,
-    cadence_max_spm: null,
-    cadence_avg_spm: null,
-    stride_length_cm: null,
-    gc_balance: null,
-    impression: null,
-    claude_eval: null,
-    claude_eval_at: null,
-    gpt_eval: null,
-    gpt_eval_at: null,
-    created_at: now,
-    updated_at: now,
-  };
+  db.prepare(`INSERT INTO slots
+    (id, date, section, slot_type, status, plan_menu, plan_notes, plan_locate, plan_shoes,
+     actual_menu, memo, impression, phase_id, source, created_at, updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(
+      id, date,
+      SESSION_TYPE_TO_SECTION[req.body.session_type] ?? null,
+      ACTIVITY_TO_SLOT_TYPE[req.body.activity_type] ?? 'run',
+      'done',
+      req.body.menu || null, null,
+      req.body.locate || null, req.body.shoes || null,
+      req.body.menu || null, req.body.memo || null, null,
+      phase ? phase.id : null, 'manual', now, now
+    );
 
-  const cols = Object.keys(s);
-  db.prepare(`INSERT INTO sessions (${cols.join(',')}) VALUES (${cols.map(() => '?').join(',')})`).run(Object.values(s));
-  res.status(201).json(s);
+  res.status(201).json(getSession(id));
 });
 
 // PATCH /api/sessions/:id
 router.patch('/:id', (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
   const now = new Date().toISOString();
+
+  const slot = db.prepare('SELECT id FROM slots WHERE id = ?').get(id);
+  if (!slot) return res.status(404).json({ error: 'not found' });
 
   const sets = [];
   const vals = [];
-  for (const [k, v] of Object.entries(updates)) {
-    if (EDITABLE_COLS.includes(k)) {
-      sets.push(`${k} = ?`);
+  let touchedEval = false;
+  for (const [k, v] of Object.entries(req.body)) {
+    if (SLOT_FIELD_MAP[k]) {
+      sets.push(`${SLOT_FIELD_MAP[k]} = ?`);
       vals.push(v);
+    } else if (k === 'activity_type') {
+      sets.push('slot_type = ?');
+      vals.push(ACTIVITY_TO_SLOT_TYPE[v] ?? 'run');
+    } else if (EVAL_FIELD_MAP[k]) {
+      const { ai, col } = EVAL_FIELD_MAP[k];
+      upsertEvalField(id, ai, col, col === 'locked' ? (v ? 1 : 0) : v, now);
+      touchedEval = true;
     }
-  }
-  if (sets.length === 0) {
-    const row = db.prepare('SELECT * FROM sessions WHERE id = ?').get(id);
-    return res.json(row);
+    // 数値系（distance_km等）はresult由来のため無視（編集対象外）
   }
 
-  db.prepare(`UPDATE sessions SET ${sets.join(', ')}, updated_at = ? WHERE id = ?`).run([...vals, now, id]);
-  const row = db.prepare('SELECT * FROM sessions WHERE id = ?').get(id);
-  res.json(row);
+  if (sets.length > 0) {
+    db.prepare(`UPDATE slots SET ${sets.join(', ')}, updated_at = ? WHERE id = ?`).run([...vals, now, id]);
+  } else if (touchedEval) {
+    db.prepare('UPDATE slots SET updated_at = ? WHERE id = ?').run(now, id);
+  }
+
+  res.json(getSession(id));
 });
 
 // GET /api/sessions/:id/laps
@@ -155,7 +160,11 @@ router.get('/:id/laps', (req, res) => {
 
 // DELETE /api/sessions/:id
 router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM sessions WHERE id = ?').run(req.params.id);
+  db.transaction(() => {
+    db.prepare('DELETE FROM evaluations WHERE slot_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM results WHERE slot_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM slots WHERE id = ?').run(req.params.id);
+  })();
   res.json({ ok: true });
 });
 

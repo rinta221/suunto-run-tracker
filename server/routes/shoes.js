@@ -5,9 +5,10 @@ const db = require('../db/database');
 
 router.get('/', (req, res) => {
   const shoes = db.prepare('SELECT * FROM shoes ORDER BY is_active DESC, name ASC').all();
-  // Recalculate total_km from sessions
+  // Recalculate total_km from slots/results (Phase 1.5)
   for (const s of shoes) {
-    const r = db.prepare('SELECT COALESCE(SUM(distance_km),0) as total FROM sessions WHERE shoes = ?').get(s.name);
+    const r = db.prepare(`SELECT COALESCE(SUM(r.distance_km),0) as total
+      FROM results r JOIN slots sl ON sl.id = r.slot_id WHERE sl.plan_shoes = ?`).get(s.name);
     s.total_km = Math.round(r.total * 10) / 10;
   }
   res.json(shoes);
