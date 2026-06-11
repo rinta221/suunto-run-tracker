@@ -120,7 +120,9 @@ async function init() {
   if (S.months.length === 0) {
     S.currentMonth = new Date().toISOString().slice(0, 7);
   } else {
-    S.currentMonth = S.months[S.months.length - 1];
+    // 計画インポートで未来月が存在しても、起動時は当月（無ければ最終月）を開く
+    const thisMonth = new Date().toISOString().slice(0, 7);
+    S.currentMonth = S.months.includes(thisMonth) ? thisMonth : S.months[S.months.length - 1];
   }
   await loadSessions();
   renderTable();
@@ -200,7 +202,7 @@ function buildDisplayRows(sessions) {
         // 最後の行の後にだけ挿入する（バー重複・同日グルーピング分断の防止）
         const lastMatch = sessions.filter(x => x.date === p.end_date && x.phase_id === p.id).pop();
         if (s !== lastMatch) continue;
-        const phaseSessions = S.sessions.filter(ps => ps.phase_id === p.id && ps.activity_type === 'running');
+        const phaseSessions = S.sessions.filter(ps => ps.phase_id === p.id && ps.activity_type === 'running' && ps.status !== 'planned');
         const totalDist = phaseSessions.reduce((acc, ps) => acc + (ps.distance_km || 0), 0);
         const totalTrimp = phaseSessions.reduce((acc, ps) => acc + (ps.trimp || 0), 0);
         const avgTrimp = phaseSessions.length ? totalTrimp / phaseSessions.length : 0;
@@ -214,7 +216,7 @@ function buildDisplayRows(sessions) {
   if (currentPhase && sessions.some(s => s.phase_id === currentPhase.id)) {
     const alreadyAdded = rows.some(r => r.kind === 'phase-summary' && r.phase.id === currentPhase.id);
     if (!alreadyAdded) {
-      const phaseSessions = S.sessions.filter(s => s.phase_id === currentPhase.id && s.activity_type === 'running');
+      const phaseSessions = S.sessions.filter(s => s.phase_id === currentPhase.id && s.activity_type === 'running' && s.status !== 'planned');
       const totalDist = phaseSessions.reduce((acc, s) => acc + (s.distance_km || 0), 0);
       const totalTrimp = phaseSessions.reduce((acc, s) => acc + (s.trimp || 0), 0);
       const avgTrimp = phaseSessions.length ? totalTrimp / phaseSessions.length : 0;
@@ -287,6 +289,7 @@ function buildSessionRow(s, isGroupStart = true, isMultiDay = false) {
   tr.className = 'row-' + s.activity_type;
   if (isGroupStart) tr.classList.add('row-date-group-start');
   if (s.source === 'ai_generated') tr.classList.add('row-ai-generated');
+  if (s.status === 'planned') tr.classList.add('row-planned');
   if (S.selectedIds.has(s.id)) tr.classList.add('row-selected');
 
   const visibleCols = COLUMNS.filter(c => !c.bio);
@@ -357,6 +360,11 @@ function buildSessionRow(s, isGroupStart = true, isMultiDay = false) {
         td.className += ' cell-ai-empty';
         td.textContent = isLocked ? '🔒' : '—';
       }
+    } else if (col.id === 'menu' && s.status === 'planned') {
+      // 計画行：plan_menuを📅付きで表示（実績ではないので非編集）
+      td.className += ' cell-wrap cell-menu-plan';
+      td.innerHTML = `<span class="plan-badge">📅</span>${escHtml(s.planned_menu || '（メニュー未設定）')}` +
+        (s.plan_notes ? `<div class="plan-notes">${escHtml(s.plan_notes)}</div>` : '');
     } else if (col.id === 'menu' && s.source === 'ai_generated' && s.planned_menu) {
       td.className += ' cell-wrap cell-menu-ai';
       const isDiff = s.menu && s.menu !== s.planned_menu;
@@ -420,7 +428,7 @@ function buildPhaseSummaryRow(row) {
 /* ===== Status Bar ===== */
 function renderStatusBar() {
   const sessions = getFilteredSessions();
-  const running = sessions.filter(s => s.activity_type === 'running');
+  const running = sessions.filter(s => s.activity_type === 'running' && s.status !== 'planned'); // 計画は月間集計に数えない
   const totalDist = running.reduce((a, s) => a + (s.distance_km || 0), 0);
   const totalTrimp = running.reduce((a, s) => a + (s.trimp || 0), 0);
   const selCount = S.selectedIds.size;
@@ -1479,6 +1487,19 @@ function initEvents() {
     renderImportUI();
   });
   document.getElementById('btn-import-commit').addEventListener('click', commitImport);
+
+  // Import Plan TSV
+  document.getElementById('btn-import-plan').addEventListener('click', openPlanModal);
+  document.getElementById('btn-close-plan').addEventListener('click', closePlanModal);
+  document.getElementById('import-plan-modal').addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop')) closePlanModal();
+  });
+  document.getElementById('btn-plan-preview').addEventListener('click', previewPlanImport);
+  document.getElementById('btn-plan-reset').addEventListener('click', resetPlanModal);
+  document.getElementById('btn-plan-commit').addEventListener('click', commitPlanImport);
+  document.getElementById('plan-result-area').addEventListener('click', (e) => {
+    if (e.target.closest('#btn-plan-undo')) undoPlanImport();
+  });
 }
 
 /* ===== Import Suunto ===== */
@@ -1706,6 +1727,149 @@ async function commitImport() {
     btn.disabled = false;
     btn.textContent = '承認して取り込む';
   }
+}
+
+/* ===== Import Plan TSV（計画インポート）===== */
+// lastInsertedIds は直近1回分の取り消し用（ページ再読込で消えてよい仕様）
+const planState = { previewed: false, lastInsertedIds: [] };
+
+function openPlanModal() {
+  resetPlanModal();
+  const sel = document.getElementById('plan-year');
+  const thisYear = new Date().getFullYear();
+  sel.innerHTML = '';
+  for (let y = thisYear - 1; y <= thisYear + 2; y++) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + '年';
+    if (y === thisYear) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  document.getElementById('import-plan-modal').style.display = 'block';
+}
+
+function closePlanModal() {
+  document.getElementById('import-plan-modal').style.display = 'none';
+}
+
+function resetPlanModal() {
+  planState.previewed = false;
+  document.getElementById('plan-input-area').style.display = 'block';
+  document.getElementById('plan-preview-area').innerHTML = '';
+  document.getElementById('plan-actions').style.display = 'none';
+  document.getElementById('plan-result-area').innerHTML = '';
+  const btn = document.getElementById('btn-plan-commit');
+  btn.disabled = false;
+  btn.textContent = '取込実行';
+}
+
+async function previewPlanImport() {
+  const tsv = document.getElementById('plan-tsv').value;
+  const year = Number(document.getElementById('plan-year').value);
+  if (!tsv.trim()) { toast('TSVを貼り付けてください', 'error'); return; }
+
+  let p;
+  try {
+    p = await api.post('/api/import/plan/preview', { tsv, year });
+  } catch(e) {
+    toast('プレビューエラー: ' + e.message, 'error');
+    return;
+  }
+
+  const area = document.getElementById('plan-preview-area');
+  let html = '';
+
+  if (p.errors.length) {
+    html += `<div class="plan-block plan-errors"><strong>❌ エラー ${p.errors.length}件（修正するまで取込できません）</strong><ul>` +
+      p.errors.map(e => `<li>${e.line}行目: ${escHtml(e.message)}</li>`).join('') + '</ul></div>';
+  }
+
+  if (p.summary) {
+    const byRows = Object.entries(p.summary.runDaysByRows)
+      .map(([rows, days]) => `${rows}行run ${days}日`).join('・');
+    html += `<div class="plan-block plan-summary">
+      <strong>📋 プレビュー</strong>
+      <div>期間: ${p.summary.startDate} 〜 ${p.summary.endDate}（${p.summary.dayCount}日）</div>
+      <div>slot総数: ${p.summary.slotCount}（rest ${p.summary.restCount}・${byRows}）→ 全件 status=planned で追加</div>
+    </div>`;
+  }
+
+  if (p.warnings.length) {
+    html += `<div class="plan-block plan-warnings"><strong>⚠ 警告 ${p.warnings.length}件（取込は可能）</strong><ul>` +
+      p.warnings.map(w => `<li>${w.line}行目: ${escHtml(w.message)}</li>`).join('') + '</ul></div>';
+  } else if (p.ok) {
+    html += '<div class="plan-block">曜日不一致の警告はありません</div>';
+  }
+
+  if (p.existing && p.existing.length) {
+    html += `<div class="plan-block plan-warnings"><strong>⚠ 既にslotが存在する日付 ${p.existing.length}日</strong>
+      <div class="plan-existing-note">マッチング・上書きはせず、計画slotをそのまま追加します（計画と実績が並びます）</div><ul>` +
+      p.existing.map(x => {
+        const detail = Object.entries(x.byStatus).map(([st, n]) => `${st} ${n}件`).join('・');
+        return `<li>${x.date}: 既存 ${x.count}件（${detail}）</li>`;
+      }).join('') + '</ul></div>';
+  } else if (p.ok) {
+    html += '<div class="plan-block">既存slotと重なる日付はありません</div>';
+  }
+
+  area.innerHTML = html;
+  planState.previewed = p.ok;
+  document.getElementById('plan-actions').style.display = p.ok ? 'flex' : 'none';
+}
+
+async function commitPlanImport() {
+  if (!planState.previewed) return;
+  const tsv = document.getElementById('plan-tsv').value;
+  const year = Number(document.getElementById('plan-year').value);
+
+  const btn = document.getElementById('btn-plan-commit');
+  btn.disabled = true;
+  btn.textContent = '取込中...';
+
+  try {
+    const r = await api.post('/api/import/plan/commit', { tsv, year });
+    planState.lastInsertedIds = r.insertedIds;
+    document.getElementById('plan-input-area').style.display = 'none';
+    document.getElementById('plan-preview-area').innerHTML = '';
+    document.getElementById('plan-actions').style.display = 'none';
+    document.getElementById('plan-result-area').innerHTML = `
+      <div class="plan-block plan-summary">
+        <strong>✅ 取込完了</strong>
+        <div>${r.count}件のslotを status=planned で追加しました（${r.summary.startDate} 〜 ${r.summary.endDate}）</div>
+        <div class="form-actions">
+          <button class="btn btn-ghost" id="btn-plan-undo">この取込を取り消す</button>
+        </div>
+      </div>`;
+    toast(`計画 ${r.count}件を取り込みました`, 'success');
+    await reloadAfterPlanChange(r.summary.startDate.slice(0, 7));
+  } catch(e) {
+    toast('取込エラー: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '取込実行';
+  }
+}
+
+async function undoPlanImport() {
+  if (!planState.lastInsertedIds.length) return;
+  if (!confirm(`直近の取込 ${planState.lastInsertedIds.length}件を削除します。よろしいですか？`)) return;
+  try {
+    const r = await api.post('/api/import/plan/undo', { ids: planState.lastInsertedIds });
+    planState.lastInsertedIds = [];
+    document.getElementById('plan-result-area').innerHTML =
+      `<div class="plan-block">↩ 取込を取り消しました（${r.deleted}件削除）</div>`;
+    toast(`取込を取り消しました（${r.deleted}件削除）`, 'success');
+    await reloadAfterPlanChange();
+  } catch(e) {
+    toast('取り消しエラー: ' + e.message, 'error');
+  }
+}
+
+async function reloadAfterPlanChange(jumpToMonth) {
+  S.months = await api.get('/api/sessions/months');
+  if (jumpToMonth && S.months.includes(jumpToMonth)) S.currentMonth = jumpToMonth;
+  if (!S.months.includes(S.currentMonth) && S.months.length) S.currentMonth = S.months[S.months.length - 1];
+  await loadSessions();
+  renderTable();
+  renderMonthNav();
 }
 
 /* ===== Boot ===== */

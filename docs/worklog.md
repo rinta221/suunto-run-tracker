@@ -464,3 +464,21 @@ npm start
 - Anthropic API 連携（`claude-sonnet-4-20250514`）→ `claude_eval` 列に書き込み
 - OpenAI API 連携（`gpt-4o-mini`）→ `gpt_eval` 列に書き込み
 - `.env` ファイルに `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` を設定
+
+## 2026-06-11 — Phase 2 第1スライス: 計画TSVインポート
+
+### 概要
+TSV（date/dow/menu/notes/section/locate/shoes）を貼り付け→プレビュー→slotsへstatus='planned'で一括投入する機能を実装（docs/suunto_design_v5.md 5.2）。パーサーはUIから分離したモジュールとし、将来のAIメニュー生成の取込口として再利用可能にした。
+
+### 実装内容
+- **server/lib/plan-tsv-parser.js**: 純粋パーサーモジュール。日付行/継続行、M/D年解釈（年跨ぎ+1）、section変換（WU/メイン/CD→wu/main/cd）、slot_type判定（section有→run/無→rest）、曜日不一致は警告（取込可）
+- **server/routes/import.js**: `/api/import/plan/preview`（DB投入なし・既存slot日付の検出含む）、`/commit`（トランザクションで全件INSERT、原本をdata/plans/に保管、挿入id配列を返却）、`/undo`（返却idのみ削除、status='planned' AND source='tsv_import'に限定）
+- **UI**: ヘッダー「📅 計画インポート」→モーダル（年セレクタ＋textarea貼り付け→プレビュー→取込実行→取り消しボタン）
+- **表示対応**: planned行はグレートーン＋📅プレフィックス（plan_menu/plan_notes表示・実績列は空欄）。フェーズまとめ・月間距離/TRIMPはstatus='planned'を集計から除外。起動時は未来月でなく当月を開くよう修正
+- **衝突ポリシー（v1）**: マッチング・上書き・スキップなし。既存slotがある日付でも計画slotをそのまま追加（計画と実績が並ぶ＝乖離が見える）。プレビューで既存slotあり日付を件数つき警告
+
+### テスト結果（plan_20260601-0810.tsv / 年=2026）
+- プレビュー: 期間2026-06-01〜08-10 / 71日 / slot総数109（rest37・3行run19日・1行run15日）/ 曜日不一致0件 / 既存slotあり=6/7のみ（done3件）→ すべて期待値どおり
+- 取込: slots 284→393 ✓ / 取り消し→284 ✓ / 再取込→393 ✓
+- 表示（Playwrightで確認）: 6月=計画行グレー混在・6/7が計画1＋実績3の4行グルーピング・月間6.8km/TRIMP83（実績のみ）・フェーズまとめ3回6.8km（計画除外）/ 7月=計画47行のみ0.0km / 8月=計画18行のみ / typeトグルはslot_typeで動作（run33/rest14）
+- バックアップ: 取込前後で npm run backup 実施（284件→393件）

@@ -76,9 +76,10 @@ function toLegacy(r) {
     updated_at: r.updated_at,
     phase_name: r.phase_name ?? null,
     phase_color: r.phase_color ?? null,
-    // v5の生情報（互換キーに追加。既存UIは未使用）
+    // v5の生情報（互換キーに追加）
     status: r.status,
     section: r.section,
+    plan_notes: r.plan_notes ?? null, // planned行（計画インポート）の表示で使用
     raw_json_path: r.raw_json_path ?? null,
   };
 }

@@ -18,6 +18,7 @@
     </div>
     <div class="header-right">
       <button class="btn btn-ghost" id="btn-import-suunto" title="Suunto生JSON取り込み">↑ 取り込み</button>
+      <button class="btn btn-ghost" id="btn-import-plan" title="計画TSVインポート">📅 計画インポート</button>
       <button class="btn btn-ghost" id="btn-add-session" title="セッション追加">＋ 追加</button>
       <button class="btn btn-ghost" id="btn-settings" title="設定">⚙ 設定</button>
     </div>
@@ -202,6 +203,38 @@
           <button class="btn btn-ghost" id="btn-import-reset">やり直す</button>
           <button class="btn btn-primary" id="btn-import-commit">承認して取り込む</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Plan TSV Modal -->
+  <div id="import-plan-modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box modal-import">
+      <div class="modal-header">
+        <h2>計画TSVインポート</h2>
+        <button id="btn-close-plan">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="plan-input-area">
+          <div class="form-group plan-year-row">
+            <label for="plan-year">年（dateは「6/1」形式のため年を指定）</label>
+            <select id="plan-year"></select>
+          </div>
+          <div class="form-group">
+            <label for="plan-tsv">TSV貼り付け（date / dow / menu / notes / section / locate / shoes）</label>
+            <textarea id="plan-tsv" rows="12" placeholder="スプレッドシートからコピーしてここに貼り付け" spellcheck="false"></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="btn-plan-preview">プレビュー</button>
+          </div>
+        </div>
+        <div id="plan-preview-area"></div>
+        <div id="plan-actions" style="display:none">
+          <button class="btn btn-ghost" id="btn-plan-reset">やり直す</button>
+          <button class="btn btn-primary" id="btn-plan-commit">取込実行</button>
+        </div>
+        <div id="plan-result-area"></div>
       </div>
     </div>
   </div>

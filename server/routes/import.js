@@ -6,9 +6,11 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db/database');
 const lapsStore = require('../laps-store');
 const { parseSession } = require('../lib/suunto-parser');
+const { parsePlanTsv } = require('../lib/plan-tsv-parser');
 const { getSession, SESSION_TYPE_TO_SECTION } = require('../db/slot-view');
 
 const RAW_DIR = path.join(__dirname, '../../data/suunto_raw');
+const PLANS_DIR = path.join(__dirname, '../../data/plans');
 
 function getPhaseId(date) {
   const p = db.prepare(
@@ -197,6 +199,97 @@ router.post('/suunto/commit', (req, res) => {
   })();
 
   res.json({ results });
+});
+
+// ============================================================
+// 計画TSVインポート（docs/suunto_design_v5.md 5.2）
+// 書き込みは slots への INSERT のみ。既存slotの UPDATE/DELETE はしない。
+// ============================================================
+
+// 取込対象期間の既存slot（日付別件数・status内訳）を返す
+function findExistingSlots(slots) {
+  const dates = [...new Set(slots.map(s => s.date))];
+  const existing = [];
+  for (const date of dates.sort()) {
+    const rows = db.prepare('SELECT status FROM slots WHERE date = ?').all(date);
+    if (rows.length === 0) continue;
+    const byStatus = {};
+    for (const r of rows) byStatus[r.status] = (byStatus[r.status] || 0) + 1;
+    existing.push({ date, count: rows.length, byStatus });
+  }
+  return existing;
+}
+
+// POST /api/import/plan/preview
+// Body: { tsv, year } → { ok, errors, warnings, summary, existing }（DB投入なし）
+router.post('/plan/preview', (req, res) => {
+  const { tsv, year } = req.body;
+  if (typeof tsv !== 'string') return res.status(400).json({ error: 'tsv required' });
+
+  const parsed = parsePlanTsv(tsv, Number(year));
+  res.json({
+    ok: parsed.ok,
+    errors: parsed.errors,
+    warnings: parsed.warnings,
+    summary: parsed.summary,
+    existing: parsed.ok ? findExistingSlots(parsed.slots) : [],
+  });
+});
+
+// POST /api/import/plan/commit
+// Body: { tsv, year }（プレビューと同一テキストを再パース→トランザクションで全件INSERT）
+// → { ok, insertedIds, count, summary }。insertedIds は取り消し（undo）に使う
+router.post('/plan/commit', (req, res) => {
+  const { tsv, year } = req.body;
+  if (typeof tsv !== 'string') return res.status(400).json({ error: 'tsv required' });
+
+  const parsed = parsePlanTsv(tsv, Number(year));
+  if (!parsed.ok) {
+    return res.status(400).json({ ok: false, errors: parsed.errors });
+  }
+
+  // 原本保管（生データ＝真実の源。v5 3.1）
+  fs.mkdirSync(PLANS_DIR, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+  fs.writeFileSync(path.join(PLANS_DIR, `plan_${stamp}.tsv`), tsv, 'utf8');
+
+  const now = new Date().toISOString();
+  const insertedIds = [];
+  const insert = db.prepare(`INSERT INTO slots
+    (id, date, section, slot_type, status, plan_menu, plan_notes, plan_locate, plan_shoes,
+     actual_menu, memo, impression, phase_id, source, created_at, updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+
+  db.transaction(() => {
+    for (const s of parsed.slots) {
+      const id = uuidv4();
+      insert.run(id, s.date, s.section, s.slot_type, 'planned',
+        s.plan_menu, s.plan_notes, s.plan_locate, s.plan_shoes,
+        null, null, null, getPhaseId(s.date), 'tsv_import', now, now);
+      insertedIds.push(id);
+    }
+  })();
+
+  res.json({ ok: true, insertedIds, count: insertedIds.length, summary: parsed.summary });
+});
+
+// POST /api/import/plan/undo
+// Body: { ids } → 直前の取込で挿入した slot のみ削除（status='planned' AND source='tsv_import' に限定）
+router.post('/plan/undo', (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids required' });
+  }
+
+  const del = db.prepare(
+    "DELETE FROM slots WHERE id = ? AND status = 'planned' AND source = 'tsv_import'"
+  );
+  let deleted = 0;
+  db.transaction(() => {
+    for (const id of ids) deleted += del.run(String(id)).changes;
+  })();
+
+  res.json({ ok: true, deleted });
 });
 
 module.exports = router;
