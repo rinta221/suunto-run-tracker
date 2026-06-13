@@ -73,22 +73,23 @@ function inspectGcb() {
 // ---------------------------------------------------------------
 function inspectHr() {
   log('\n== 事前検査2：avg_hr_pct 値域検査 ==');
-  const suunto = db.prepare("SELECT MIN(avg_hr_pct) mn, MAX(avg_hr_pct) mx, COUNT(avg_hr_pct) n FROM sessions WHERE source='suunto'").get();
-  const sheet = db.prepare("SELECT MIN(avg_hr_pct) mn, MAX(avg_hr_pct) mx, COUNT(avg_hr_pct) n FROM sessions WHERE source!='suunto'").get();
-  log(`source='suunto'（bpm格納・換算なし）: ${suunto.n}件  値域 ${suunto.mn}〜${suunto.mx}`);
-  log(`source≠'suunto'（%HRmax・×${MAX_HR}/100換算）: ${sheet.n}件  値域 ${sheet.mn}〜${sheet.mx}`);
+  // suunto / manual はともに bpm 格納。spreadsheet のみ %HRmax 格納で換算が必要。
+  const bpmSrc = db.prepare("SELECT MIN(avg_hr_pct) mn, MAX(avg_hr_pct) mx, COUNT(avg_hr_pct) n FROM sessions WHERE source IN ('suunto','manual')").get();
+  const sheet = db.prepare("SELECT MIN(avg_hr_pct) mn, MAX(avg_hr_pct) mx, COUNT(avg_hr_pct) n FROM sessions WHERE source NOT IN ('suunto','manual')").get();
+  log(`source=suunto/manual（bpm格納・換算なし）: ${bpmSrc.n}件  値域 ${bpmSrc.mn}〜${bpmSrc.mx}`);
+  log(`source=spreadsheet等（%HRmax・×${MAX_HR}/100換算）: ${sheet.n}件  値域 ${sheet.mn}〜${sheet.mx}`);
 
   if (sheet.n > 0 && sheet.mx >= 120) {
-    const bad = db.prepare("SELECT date, source, avg_hr_pct FROM sessions WHERE source!='suunto' AND avg_hr_pct >= 120").all();
+    const bad = db.prepare("SELECT date, source, avg_hr_pct FROM sessions WHERE source NOT IN ('suunto','manual') AND avg_hr_pct >= 120").all();
     fail('換算対象行に120以上の値が混在（bpm誤格納の疑い）。換算せず停止します: ' + JSON.stringify(bad));
     process.exit(1);
   }
-  const outliers = db.prepare("SELECT date, avg_hr_pct, menu FROM sessions WHERE source!='suunto' AND avg_hr_pct IS NOT NULL AND (avg_hr_pct < 50 OR avg_hr_pct > 95)").all();
+  const outliers = db.prepare("SELECT date, avg_hr_pct, menu FROM sessions WHERE source NOT IN ('suunto','manual') AND avg_hr_pct IS NOT NULL AND (avg_hr_pct < 50 OR avg_hr_pct > 95)").all();
   if (outliers.length) {
     log(`50〜95の外側（120未満・換算は実施）: ${outliers.length}件`);
     for (const r of outliers) log(`  ${r.date}  ${r.avg_hr_pct}%（${r.menu || ''}）→ ${Math.round(r.avg_hr_pct * MAX_HR / 100)}bpm`);
   }
-  ok('値域検査OK：換算対象は%HRmaxとして妥当');
+  ok('値域検査OK');
 }
 
 // ---------------------------------------------------------------
@@ -171,7 +172,7 @@ function migrate(gcbRescue) {
         // HR：suunto行は既にbpm格納→そのまま。スプレッドシート行は%HRmax→bpm推定換算
         let avgHrBpm = null;
         if (s.avg_hr_pct != null) {
-          avgHrBpm = s.source === 'suunto'
+          avgHrBpm = (s.source === 'suunto' || s.source === 'manual')
             ? Math.round(s.avg_hr_pct)
             : Math.round(s.avg_hr_pct * MAX_HR / 100);
         }
@@ -275,7 +276,7 @@ function verify() {
   // 日付スポットチェック
   const spot = (date) => db.prepare('SELECT section FROM slots WHERE date = ? ORDER BY section').all(date).map(r => r.section ?? '(null)');
   const s531 = spot('2026-05-31');
-  (s531.length === 2 ? ok : fail)(`5/31 = ${s531.length} slots [${s531.join(', ')}]（期待: 2 slots）`);
+  (s531.length === 1 ? ok : fail)(`5/31 = ${s531.length} slots [${s531.join(', ')}]（期待: 1 slot = 100kmウルトラ1行）`);
   const s607 = spot('2026-06-07');
   const has3 = s607.length === 3 && ['cd', 'main', 'wu'].every(x => s607.includes(x));
   (has3 ? ok : fail)(`6/7 = ${s607.length} slots [${s607.join(', ')}]（期待: wu/main/cdの3 slots）`);

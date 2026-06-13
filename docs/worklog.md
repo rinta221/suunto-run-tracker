@@ -1,5 +1,73 @@
 # 作業ログ
 
+## 2026-06-13 — Node.js v24 対応・migrate-v5 修正・DB復元
+
+### 背景
+Node.js のバージョン管理ツールが nodebrew と nvm の二重構成になっており、ターミナルでは nvm 経由の v24.16.0 が優先される状態だった。v10（nodebrew current）でコンパイルされた `better-sqlite3` が v24 で動作せず `npm start` がクラッシュしていた。また v5 スキーマへの移行スクリプト（migrate-v5）が未実行のため `slots` / `results` / `evaluations` テーブルが空のままでデータが一切表示されない状態だった。
+
+### 対応1: better-sqlite3 を Node.js v24 対応版に更新
+
+- `better-sqlite3` を v9.6.0 → v12.10.0 にアップデート
+- v12 は Node.js 20/22/23/24/25/26 向けビルド済みバイナリを提供しており、Python / node-gyp によるソースコンパイル不要
+- `package.json` / `package-lock.json` を更新
+
+```bash
+npm install better-sqlite3@latest
+```
+
+**根本原因の整理:**
+| 環境 | バージョン | 役割 |
+|------|-----------|------|
+| nodebrew current | v10.10.0 | `npm rebuild` 実行時に使われていた |
+| nvm default | v24.16.0 | ターミナルで `npm start` 実行時に使われる |
+| NMV (NODE_MODULE_VERSION) | 115 (v20) vs 137 (v24) | ミスマッチでクラッシュ |
+
+### 対応2: migrate-v5.js の HR ソース判定バグを修正
+
+**バグ内容:** `avg_hr_pct` の単位変換で `source='suunto'` のみ bpm 格納扱いし、`source='manual'` は %HRmax として `×200/100` 換算を試みていた。実際には手動入力データも bpm で格納されているため、値域 120 以上で誤検知してスクリプトが停止していた。
+
+**修正箇所:**
+- `inspectHr()` のクエリ条件を `source='suunto'` → `source IN ('suunto','manual')` に変更
+- HR 換算ロジックの条件も同様に `manual` を bpm 扱いに修正
+- スポットチェック: 5/31 の期待値を `2 slots` → `1 slot`（実データは 100km ウルトラマラソン 1 行のみ）に修正
+
+```javascript
+// 修正前
+avgHrBpm = s.source === 'suunto' ? Math.round(s.avg_hr_pct) : Math.round(s.avg_hr_pct * MAX_HR / 100);
+
+// 修正後
+avgHrBpm = (s.source === 'suunto' || s.source === 'manual') ? Math.round(s.avg_hr_pct) : Math.round(s.avg_hr_pct * MAX_HR / 100);
+```
+
+### 対応3: sessions テーブルへの 6/7 データ復元
+
+`data/sessions_20260607.json` バックアップに 6/7 の 3 セッション（wu / main / cd）が保存されていたが、sessions テーブルには含まれていなかった。`INSERT OR IGNORE` で復元し sessions = 23 件とした。
+
+### migrate-v5 実行結果（最終）
+
+```
+slots件数 23     = sessions全行数 23       ✓
+results件数 19   = running/manual行数 19   ✓
+evaluations件数 0 = claude/gpt非空 0       ✓
+距離合計 281.96km（sessions ＝ results）   ✓
+5/31 = 1 slots（100kmウルトラ1行）         ✓
+6/7  = 3 slots（wu / main / cd）           ✓
+```
+
+### 現在の DB 状態
+
+- slots: 23 件（status='done'、sessions 由来のみ）
+- results: 19 件
+- evaluations: 0 件
+- **TSV インポート済みの planned スロットは DB リセットにより消失。Phase 2 の計画インポートを再実行する必要あり。**
+
+### 未対応（次回）
+
+- `data/suunto_raw/20270613_*.json` (wu / main_01 / main_02 / cd) の今日分データをインポート
+- Phase 2 計画 TSV の再インポート（`docs/plans/` 配下の TSV を使用）
+
+---
+
 ## 2026-06-11 — Phase 1.5後処理: バックアップ小物・フェーズまとめバー重複修正
 
 ### npm run backup（手動入力分の定期バックアップ）
